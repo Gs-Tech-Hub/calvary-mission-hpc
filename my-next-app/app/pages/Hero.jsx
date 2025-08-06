@@ -1,6 +1,7 @@
 import React from 'react'
 import Navbar from '../componenets/Navbar'
 import Image from 'next/image'
+import Body from '../componenets/Body'
 
 const Hero = () => {
   return (
@@ -32,6 +33,7 @@ const Hero = () => {
           </div>
         </div>
       </div>
+      <Body/>
     </div>
   )
 }

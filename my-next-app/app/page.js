@@ -1,5 +1,5 @@
 import Navbar from "./componenets/Navbar";
-import Body from "./pages/Body";
+import Body from "./componenets/Body";
 import Hero from "./pages/Hero";
 
 export default function Home() {
@@ -7,7 +7,7 @@ export default function Home() {
     <>
     <div>
       <Hero/>
-      <Body/>
+      
 
     </div>
     

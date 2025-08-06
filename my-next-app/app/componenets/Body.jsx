@@ -13,11 +13,24 @@ const data = [
     title: 'Connect & Serve',
     description: 'Sign up to volunteer and be part of something bigger than yourself.',
   },
-]
+  {
+    title: 'Online Giving',
+    description: 'Support the ministry by giving your tithes and offerings securely online.',
+  },
+  {
+    title: 'Prayer Requests',
+    description: 'Share your prayer needs and let our team lift you up in prayer.',
+  },
+  {
+    title: 'New Here?',
+    description: 'Get to know our church, what we believe, and how to get involved.',
+  },
+];
+
 
 const Body = () => {
   return (
-    <div className="bg-gray-50 min-h-screen py-10 px-6 font-sans">
+    <div className="bg-gray-50 sm:h-[400px] h-[1100px] py-10 px-6 font-sans">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
         {data.map((item, index) => (
           <div
