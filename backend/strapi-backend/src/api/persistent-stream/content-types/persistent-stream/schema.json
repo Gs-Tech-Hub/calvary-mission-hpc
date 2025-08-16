@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "persistent_streams",
+  "info": {
+    "singularName": "persistent-stream",
+    "pluralName": "persistent-streams",
+    "displayName": "Persistent Stream"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "streamUrl": {
+      "type": "text"
+    },
+    "streamKey": {
+      "type": "text"
+    },
+    "streamId": {
+      "type": "string"
+    }
+  }
+}
