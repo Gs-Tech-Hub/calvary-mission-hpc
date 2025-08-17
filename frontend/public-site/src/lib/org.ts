@@ -134,3 +134,200 @@ export const testimonials = [
   },
 ];
 
+// lib/org.ts
+export const sermonsDetails = [
+  {
+    id: 1,
+    slug: "power-of-faith",
+    title: "The Power of Faith",
+    date: "2025-08-15",
+    category: "Sermon",
+    thumbnail: "/images/placeholder.jpg",
+    description: "Discover how faith transforms lives in this inspiring message.",
+    fullDescription:
+      "Faith is the substance of things hoped for and the evidence of things not seen. In this sermon, we dive deep into the meaning of faith, how to apply it daily, and how it shapes your future.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+  },
+  {
+    id: 2,
+    slug: "walking-in-love",
+    title: "Walking in Love",
+    date: "2025-08-08",
+    category: "Sermon",
+    thumbnail: "/images/placeholder.jpg",
+    description: "Love is the greatest commandment—learn to live it daily.",
+    fullDescription:
+      "Love is patient, love is kind. This message reminds us of the importance of showing genuine love to everyone we meet.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+  },
+  {
+    id: 3,
+    slug: "hope-in-darkness",
+    title: "Hope in Darkness",
+    date: "2025-08-01",
+    category: "Sermon",
+    thumbnail: "/images/placeholder.jpg",
+    description: "Finding light when the world seems dark.",
+    fullDescription:
+      "Even in our darkest times, God's light shines through. This sermon explores how to hold onto hope when all seems lost.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+  },
+  {
+    id: 4,
+    slug: "god-of-breakthrough",
+    title: "God of Breakthrough",
+    date: "2025-07-25",
+    category: "Sermon",
+    thumbnail: "/images/placeholder.jpg",
+    description: "Your breakthrough is closer than you think.",
+    fullDescription:
+      "God specializes in making a way where there seems to be no way. This sermon focuses on biblical examples of breakthrough and how to claim yours.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+  },
+  {
+    id: 5,
+    slug: "joy-of-salvation",
+    title: "The Joy of Salvation",
+    date: "2025-07-18",
+    category: "Sermon",
+    thumbnail: "/images/placeholder.jpg",
+    description: "Reignite your joy in the Lord.",
+    fullDescription:
+      "Salvation is the greatest gift—this message will reignite your passion for the things of God.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+  },
+  {
+    id: 6,
+    slug: "prayer-that-moves-mountains",
+    title: "Prayer that Moves Mountains",
+    date: "2025-07-11",
+    category: "Sermon",
+    thumbnail: "/images/placeholder.jpg",
+    description: "Learn to pray with power and purpose.",
+    fullDescription:
+      "Prayer is not just words—it is spiritual warfare. This sermon equips you to pray effectively and see results.",
+    video: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+  },
+];
+
+export const eventsDetails = [
+  {
+    id: 1,
+    slug: "youth-conference-2025",
+    title: "Youth Conference 2025",
+    date: "2025-09-01",
+    category: "Event",
+    thumbnail: "/images/placeholder.jpg",
+    description: "A gathering for the next generation of believers.",
+    fullDescription:
+      "Join us for a life-changing youth conference filled with worship, the Word, and fellowship.",
+  },
+  {
+    id: 2,
+    slug: "community-outreach",
+    title: "Community Outreach",
+    date: "2025-09-15",
+    category: "Event",
+    thumbnail: "/images/placeholder.jpg",
+    description: "Bringing hope and help to our local community.",
+    fullDescription:
+      "Be part of our mission to serve and uplift our community through practical acts of kindness and love.",
+  },
+  {
+    id: 3,
+    slug: "thanksgiving-service",
+    title: "Annual Thanksgiving Service",
+    date: "2025-11-01",
+    category: "Event",
+    thumbnail: "/images/placeholder.jpg",
+    description: "Giving thanks for all God has done.",
+    fullDescription:
+      "Celebrate God's faithfulness with us in a joyful service of worship and thanksgiving.",
+  },
+];
+export const mediaVideos = [
+  {
+    id: 1,
+    title: "Sunday Worship Service",
+    videoUrl: "https://www.youtube.com/embed/ysz5S6PUM-U",
+    thumbnail: "https://i.ytimg.com/vi/ysz5S6PUM-U/hqdefault.jpg",
+    duration: "1:05:32",
+    description: "Join us for our uplifting Sunday Worship Service."
+  },
+  {
+    id: 2,
+    title: "Bible Study – The Book of John",
+    videoUrl: "https://www.youtube.com/embed/tgbNymZ7vqY",
+    thumbnail: "https://i.ytimg.com/vi/tgbNymZ7vqY/hqdefault.jpg",
+    duration: "48:10",
+    description: "Deep dive into the Book of John with Pastor James."
+  },
+  {
+    id: 3,
+    title: "Youth Fellowship Highlights",
+    videoUrl: "https://www.youtube.com/embed/LXb3EKWsInQ",
+    thumbnail: "https://i.ytimg.com/vi/LXb3EKWsInQ/hqdefault.jpg",
+    duration: "25:50",
+    description: "Celebrating our vibrant youth community."
+  }
+];
+export const givingInfo = {
+  heroImage: "/images/giving-hero.jpg",
+  heroTitle: "Your Giving Makes a Difference",
+  heroSubtitle: "Support our mission to spread love, faith, and hope.",
+  methods: [
+    {
+      title: "Bank Transfer",
+      details: "Account Name: The Church\nAccount No: 1234567890\nBank: Zenith Bank",
+    },
+    {
+      title: "Give Online",
+      details: "Secure online giving via Paystack.",
+      link: "https://paystack.com/pay/example",
+      buttonText: "Give via Paystack",
+    },
+    {
+      title: "Mobile Money",
+      details: "MTN MoMo: +234 800 123 4567",
+    },
+  ],
+  scripture: {
+    quote: "Each of you should give what you have decided in your heart to give...",
+    reference: "2 Corinthians 9:7",
+  },
+  ctaLink: "https://paystack.com/pay/example",
+};
+export const aboutContent = {
+  welcome: {
+    title: "Welcome to Our Church",
+    description:
+      "Our mission is to bring people closer to God through worship, service, and love. Since our foundation, we have been a community of believers united by faith, hope, and charity. We open our doors to everyone seeking a deeper relationship with Christ and a meaningful place in a loving spiritual family.",
+    images: [
+      "/images/gallery1.jpg",
+      "/images/gallery2.jpg",
+      "/images/gallery3.jpg",
+      "/images/gallery4.jpg",
+      "/images/gallery5.jpg",
+      "/images/gallery6.jpg",
+    ],
+  },
+
+  timeline: [
+    { year: "1995", event: "Church founded with a small prayer group in a living room." },
+    { year: "2000", event: "Built our first worship hall to accommodate our growing community." },
+    { year: "2008", event: "Started our Youth Ministry and outreach programs." },
+    { year: "2015", event: "Launched community development projects and charity drives." },
+    { year: "2022", event: "Introduced online streaming and global prayer meetings." },
+  ],
+
+  timelineImage: "/images/timeline.jpg",
+
+  contact: {
+    description: "Whether you have a question, prayer request, or want to join our community, we’d love to hear from you.",
+    phone: "+234 800 000 0000",
+    email: "info@thechurch.com",
+    address: "123 Faith Avenue, Lagos, Nigeria",
+  },
+};
+
+
