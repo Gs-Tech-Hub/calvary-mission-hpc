@@ -6,16 +6,38 @@ import Link from "next/link";
 import { FaPlay } from "react-icons/fa";
 import { churchTV as mockChurchTV } from "@/lib/org";
 
+type NowPlaying = {
+  title: string;
+  description: string;
+  videoUrl: string;
+  isLive?: boolean;
+  contentType?: string;
+};
+
+type MoreToWatchItem = {
+  id: string | number;
+  title: string;
+  thumbnail: any;
+  videoUrl?: string;
+  contentType?: string;
+};
+
+
+type ChurchTVState = {
+  nowPlaying: NowPlaying;
+  moreToWatch: MoreToWatchItem[];
+};
+
 export default function ChurchTV() {
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.2 });
-  const [churchTV, setChurchTV] = useState<any>(null);
+  const [churchTV, setChurchTV] = useState<ChurchTVState | null>(null);
 
   useEffect(() => {
     async function fetchContent() {
       try {
         // First check for live stream
         const liveRes = await fetch('/api/strapi?endpoint=live-streams&filters[isLive][$eq]=true&populate=*');
-        let nowPlaying = null;
+        let nowPlaying: NowPlaying | null = null;
 
         if (liveRes.ok) {
           const liveData = await liveRes.json();

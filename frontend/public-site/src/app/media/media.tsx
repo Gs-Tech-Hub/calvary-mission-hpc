@@ -10,7 +10,7 @@ export default function MediaPage() {
   useEffect(() => {
     async function fetchVideos() {
       try {
-        let allVideos = [];
+        let allVideos: any[] = [];
 
         // First, check for live streams
         const liveRes = await fetch('/api/strapi?endpoint=live-streams?filters[isLive][$eq]=true&populate=*');
