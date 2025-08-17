@@ -1,11 +1,68 @@
 "use client";
 
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { testimonials } from "@/lib/org";
 import Autoplay from "embla-carousel-autoplay";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+
+const mockTestimonials = [
+  {
+    id: 1,
+    name: "Jane Doe",
+    role: "Member",
+    quote: "This church has changed my life!",
+    image: "/default-avatar.jpg",
+  },
+  {
+    id: 2,
+    name: "John Smith",
+    role: "Volunteer",
+    quote: "Amazing community and teachings.",
+    image: "/default-avatar.jpg",
+  },
+];
 
 export default function Testimonials() {
+  const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchTestimonials() {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/testimonials?populate=image`);
+        if (!res.ok) throw new Error("Failed to fetch testimonials");
+        const data = await res.json();
+
+        const formatted = data?.data?.map((item: any) => ({
+          id: item.id,
+          name: item?.attributes?.name || "Anonymous",
+          role: item?.attributes?.role || "",
+          quote: item?.attributes?.quote || "",
+          image: item?.attributes?.image?.data?.attributes?.url
+            ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.attributes.image.data.attributes.url}`
+            : "/default-avatar.jpg",
+        })) || [];
+
+        setTestimonials(formatted.length ? formatted : mockTestimonials);
+      } catch (error) {
+        console.warn("Failed to fetch testimonials. Using mock data.", error);
+        setTestimonials(mockTestimonials);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchTestimonials();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="bg-gray-500 py-16 text-center text-white">
+        <p>Loading testimonials...</p>
+      </section>
+    );
+  }
+
   return (
     <section className="bg-gray-500 py-16">
       <div className="max-w-6xl mx-auto px-4 text-center">
@@ -20,9 +77,7 @@ export default function Testimonials() {
             align: "start",
           }}
           plugins={[
-            Autoplay({
-              delay: 3500,
-            }),
+            Autoplay({ delay: 3500 }),
           ]}
         >
           <CarouselContent>

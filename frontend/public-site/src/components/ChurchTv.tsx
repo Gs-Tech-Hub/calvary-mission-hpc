@@ -1,20 +1,46 @@
 "use client";
 
-import { useState } from "react";
-import { churchTV } from "@/lib/org";
+import { useState, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
+import Link from "next/link";
 import { FaPlay } from "react-icons/fa";
-import { IoClose } from "react-icons/io5";
+import { churchTV as mockChurchTV } from "@/lib/org"; 
 
 export default function ChurchTV() {
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.2 });
-  const [showVideo, setShowVideo] = useState(false);
+  const [churchTV, setChurchTV] = useState<any>(null);
+
+  useEffect(() => {
+    async function fetchChurchTV() {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/church-tv?populate=*`
+        );
+        if (!res.ok) throw new Error("Failed to fetch ChurchTV data");
+        const data = await res.json();
+        setChurchTV(data.data.attributes);
+      } catch (err) {
+        console.warn("Strapi fetch failed, using mock ChurchTV data");
+        setChurchTV(mockChurchTV);
+      }
+    }
+
+    fetchChurchTV();
+  }, []);
+
+  if (!churchTV) {
+    return (
+      <section className="bg-gray-100 py-16 text-center">
+        <p>Loading...</p>
+      </section>
+    );
+  }
 
   return (
     <section ref={ref} className="bg-gray-100 py-16">
       <div className="max-w-6xl mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
-           Watch Live & On Demand
+          Watch Live & On Demand
         </h2>
 
         <div
@@ -22,43 +48,40 @@ export default function ChurchTV() {
             inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
           }`}
         >
-          <div className="relative cursor-pointer" onClick={() => setShowVideo(true)}>
-            <img
-              src={churchTV.nowPlaying.videoThumbnail}
-              alt={churchTV.nowPlaying.title}
-              className="w-full h-96 object-cover"
-            />
-
-            <div className="absolute inset-0 bg-black/40 flex flex-col justify-center items-center text-center p-6">
-              <h3 className="text-white text-2xl font-bold mb-4">
-                {churchTV.nowPlaying.title}
-              </h3>
-              <p className="text-white max-w-xl mb-6">
-                {churchTV.nowPlaying.description}
-              </p>
-              <button className="flex items-center gap-2 px-6 py-3 bg-[#0A1D3C] text-white font-semibold rounded-lg hover:bg-blue-900 transition-all">
-                <FaPlay /> Watch Now
-              </button>
-            </div>
+          <div className="relative w-full aspect-video">
+            <iframe
+              src={`${churchTV.nowPlaying?.videoUrl}?autoplay=1`}
+              className="w-full h-full"
+              allow="autoplay; fullscreen"
+            ></iframe>
+          </div>
+          <div className="bg-[#0A1D3C] text-white p-6">
+            <h3 className="text-2xl font-bold mb-2">
+              {churchTV.nowPlaying?.title}
+            </h3>
+            <p className="mb-4">{churchTV.nowPlaying?.description}</p>
+            <Link
+              href="/media"
+              className="flex items-center gap-2 px-6 py-3 bg-white text-[#0A1D3C] font-semibold rounded-lg hover:bg-gray-200 transition-all w-fit"
+            >
+              <FaPlay /> View All Media
+            </Link>
           </div>
         </div>
 
-        {/* More to Watch */}
         <div className="grid gap-6 md:grid-cols-3">
-          {churchTV.moreToWatch.map((video, index) => (
-            <a
+          {churchTV.moreToWatch?.map((video: any, index: number) => (
+            <Link
               key={video.id}
-              href={video.link}
+              href={`/media?video=${encodeURIComponent(video.id)}`}
               className={`bg-white/30 backdrop-blur-md rounded-lg overflow-hidden shadow-lg transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl ${
-                inView
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-10"
+                inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
               }`}
               style={{ transitionDelay: `${index * 150}ms` }}
             >
               <div className="relative">
                 <img
-                  src={video.thumbnail}
+                  src={video.thumbnail?.data?.attributes?.url}
                   alt={video.title}
                   className="w-full h-48 object-cover"
                 />
@@ -71,28 +94,10 @@ export default function ChurchTV() {
                   {video.title}
                 </h4>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
       </div>
-
-      {showVideo && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div className="relative w-[90%] max-w-4xl aspect-video bg-black rounded-lg overflow-hidden">
-            <iframe
-              src={churchTV.nowPlaying.videoUrl}
-              className="w-full h-full"
-              allow="autoplay; fullscreen"
-            ></iframe>
-            <button
-              onClick={() => setShowVideo(false)}
-              className="absolute top-4 right-4 text-white text-3xl hover:text-gray-300"
-            >
-              <IoClose />
-            </button>
-          </div>
-        </div>
-      )}
     </section>
   );
 }
