@@ -30,6 +30,48 @@ export default function Hero() {
     );
   }
 
+
+  function LiveStreamButton() {
+    const [liveStream, setLiveStream] = useState<any>(null);
+
+    useEffect(() => {
+      async function checkLiveStream() {
+        try {
+          const res = await fetch('/api/strapi?endpoint=live-streams?filters[isLive][$eq]=true&populate=*');
+          if (res.ok) {
+            const data = await res.json();
+            if (data.data.length > 0) {
+              setLiveStream(data.data[0]);
+            }
+          }
+        } catch (err) {
+          console.log("No live stream available");
+        }
+      }
+
+      checkLiveStream();
+      const interval = setInterval(checkLiveStream, 30000);
+      return () => clearInterval(interval);
+    }, []);
+
+    if (liveStream) {
+      return (
+        <a
+          href={liveStream.watchUrl}
+          className="px-6 py-3 bg-red-600 text-white rounded-md transition-all hover:bg-red-700 flex items-center gap-2"
+        >
+          🔴 Watch Live Now
+        </a>
+      );
+    }
+
+    return (
+      <button className="px-6 py-3 border-2 border-white text-white rounded-md transition-all hover:bg-white hover:text-[#0A1D3C]">
+        Live Service
+      </button>
+    );
+  }
+
   return (
     <section
       className="relative pt-[80px] md:pt-[100px] text-white"
@@ -51,13 +93,13 @@ export default function Hero() {
           </h1>
           <p className="text-lg mb-6">{heroData.description || heroData.heroText?.subtitle}</p>
 
-          <button className="px-6 py-3 border-2 border-white text-white rounded-md transition-all hover:bg-white hover:text-[#0A1D3C] mb-2 md:mb-0">
-            Go to Sermons
-          </button>
+          <div className="flex flex-col md:flex-row gap-4">
+            <button className="px-6 py-3 border-2 border-white text-white rounded-md transition-all hover:bg-white hover:text-[#0A1D3C]">
+              Go to Sermons
+            </button>
+            <LiveStreamButton />
+          </div>
 
-          <button className="px-6 py-3 border-2 ml-0 md:ml-4 mt-2 md:mt-0 border-white text-white rounded-md transition-all hover:bg-white hover:text-[#0A1D3C]">
-            Live Service
-          </button>
         </div>
         <div className="w-full md:w-1/2 flex justify-center">
           <div className="rounded-lg overflow-hidden shadow-lg max-w-sm w-full">

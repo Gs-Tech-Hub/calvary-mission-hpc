@@ -541,12 +541,17 @@ export interface ApiSermonSermon extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
+    slug: Schema.Attribute.UID<'title'>;
     speaker: Schema.Attribute.String;
+    textContent: Schema.Attribute.Blocks;
+    thumbnail: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
     title: Schema.Attribute.String & Schema.Attribute.Required;
+    typeOfContent: Schema.Attribute.Enumeration<['video', 'text']> &
+      Schema.Attribute.DefaultTo<'video'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    youtubeId: Schema.Attribute.Text & Schema.Attribute.Required;
+    youtubeId: Schema.Attribute.Text;
   };
 }
 

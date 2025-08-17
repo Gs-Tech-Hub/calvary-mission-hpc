@@ -23,10 +23,35 @@
     },
     "youtubeId": {
       "type": "text",
-      "required": true
+      "required": false
     },
     "description": {
       "type": "blocks"
+    },
+    "typeOfContent": {
+      "type": "enumeration",
+      "default": "video",
+      "enum": [
+        "video",
+        "text"
+      ]
+    },
+    "textContent": {
+      "type": "blocks"
+    },
+    "thumbnail": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title"
     }
   }
 }
