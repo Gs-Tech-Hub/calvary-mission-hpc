@@ -132,19 +132,30 @@ async function createLiveStream(accessToken: string, title: string) {
 
 async function startLiveStream(accessToken: string, broadcastId: string) {
     try {
-        // Check current status first
-        const currentStatus = await api.getStreamStatus(broadcastId)
-        const currentLifeCycle = currentStatus.lifeCycleStatus
+        // 1. Check current broadcast status
+        const statusRes = await fetch(
+            `https://www.googleapis.com/youtube/v3/liveBroadcasts?part=status&id=${broadcastId}`,
+            {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            }
+        )
 
+        if (!statusRes.ok) {
+            const err = await statusRes.json()
+            throw new Error(`Failed to fetch broadcast status: ${JSON.stringify(err)}`)
+        }
+
+        const statusJson = await statusRes.json()
+        const currentLifeCycle = statusJson.items?.[0]?.status?.lifeCycleStatus
+
+        // 2. Handle state transitions
         if (currentLifeCycle === 'ready') {
-            // If ready, transition to testing first
+            // Move to testing
             const testResponse = await fetch(
                 `https://www.googleapis.com/youtube/v3/liveBroadcasts/transition?broadcastStatus=testing&id=${broadcastId}&part=status`,
                 {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`
-                    }
+                    headers: { Authorization: `Bearer ${accessToken}` },
                 }
             )
 
@@ -153,35 +164,49 @@ async function startLiveStream(accessToken: string, broadcastId: string) {
                 throw new Error(`Testing transition error: ${JSON.stringify(testError)}`)
             }
 
-            // Wait a moment
-            await new Promise(resolve => setTimeout(resolve, 2000))
+            return NextResponse.json({
+                success: true,
+                status: 'testing',
+                lifeCycleStatus: 'testing',
+            })
         }
 
-        // Now transition to live (whether we were in ready or testing)
-        const liveResponse = await fetch(
-            `https://www.googleapis.com/youtube/v3/liveBroadcasts/transition?broadcastStatus=live&id=${broadcastId}&part=status`,
-            {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`
+        if (currentLifeCycle === 'testing') {
+            // Move to live
+            const liveResponse = await fetch(
+                `https://www.googleapis.com/youtube/v3/liveBroadcasts/transition?broadcastStatus=live&id=${broadcastId}&part=status`,
+                {
+                    method: 'POST',
+                    headers: { Authorization: `Bearer ${accessToken}` },
                 }
-            }
-        )
+            )
 
-        if (!liveResponse.ok) {
-            const liveError = await liveResponse.json()
-            throw new Error(`Live transition error: ${JSON.stringify(liveError)}`)
+            if (!liveResponse.ok) {
+                const liveError = await liveResponse.json()
+                throw new Error(`Live transition error: ${JSON.stringify(liveError)}`)
+            }
+
+            return NextResponse.json({
+                success: true,
+                status: 'live',
+                lifeCycleStatus: 'live',
+            })
         }
 
-        return NextResponse.json({
-            success: true,
-            status: 'live',
-            lifeCycleStatus: 'live'
-        })
+        if (currentLifeCycle === 'live') {
+            return NextResponse.json({
+                success: true,
+                status: 'live',
+                lifeCycleStatus: 'live',
+            })
+        }
+
+        throw new Error(`Broadcast in invalid state: ${currentLifeCycle}`)
     } catch (error: any) {
         throw new Error(`Start live stream failed: ${error.message}`)
     }
 }
+
 
 async function stopLiveStream(accessToken: string, broadcastId: string) {
     try {

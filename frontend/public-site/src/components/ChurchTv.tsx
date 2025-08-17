@@ -4,28 +4,92 @@ import { useState, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import Link from "next/link";
 import { FaPlay } from "react-icons/fa";
-import { churchTV as mockChurchTV } from "@/lib/org"; 
+import { churchTV as mockChurchTV } from "@/lib/org";
 
 export default function ChurchTV() {
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.2 });
   const [churchTV, setChurchTV] = useState<any>(null);
 
   useEffect(() => {
-    async function fetchChurchTV() {
+    async function fetchContent() {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/church-tv?populate=*`
-        );
-        if (!res.ok) throw new Error("Failed to fetch ChurchTV data");
-        const data = await res.json();
-        setChurchTV(data.data.attributes);
+        // First check for live stream
+        const liveRes = await fetch('/api/strapi?endpoint=live-streams&filters[isLive][$eq]=true&populate=*');
+        let nowPlaying = null;
+
+        if (liveRes.ok) {
+          const liveData = await liveRes.json();
+          if (liveData.data.length > 0) {
+            const live = liveData.data[0];
+            nowPlaying = {
+              title: `🔴 ${live.title} (LIVE)`,
+              description: "Join us for our live service",
+              videoUrl: live.watchUrl,
+              isLive: true
+            };
+          }
+        }
+
+        // If no live stream, get latest sermon
+        if (!nowPlaying) {
+          const sermonsRes = await fetch('/api/strapi?endpoint=sermons&populate=*&sort[0]=date:desc&pagination[limit]=1');
+          if (sermonsRes.ok) {
+            const sermonsData = await sermonsRes.json();
+            if (sermonsData.data.length > 0) {
+              const sermon = sermonsData.data[0];
+              let videoUrl = '';
+
+              // Handle different content types
+              if (sermon.contentType === 'video' && sermon.youtubeId) {
+                videoUrl = `https://www.youtube.com/embed/${sermon.youtubeId}`;
+              }
+
+              nowPlaying = {
+                title: sermon.title,
+                description: sermon.description?.[0]?.children?.[0]?.text || "Recent sermon",
+                videoUrl: videoUrl,
+                contentType: sermon.contentType,
+                isLive: false
+              };
+            }
+          }
+        }
+
+        // Get more sermons for sidebar
+        const moreRes = await fetch('/api/strapi?endpoint=sermons&populate=*&sort[0]=date:desc&pagination[limit]=3&pagination[start]=1');
+        let moreToWatch = [];
+
+        if (moreRes.ok) {
+          const moreData = await moreRes.json();
+          moreToWatch = moreData.data.map((sermon: any) => ({
+            id: sermon.id,
+            title: sermon.title,
+            thumbnail: {
+              data: {
+                attributes: {
+                  url: sermon.thumbnail?.data?.url || "/placeholder.jpg"
+                }
+              }
+            },
+            videoUrl: sermon.youtubeId ? `https://www.youtube.com/embed/${sermon.youtubeId}` : '#',
+            contentType: sermon.contentType
+          }));
+        }
+
+        setChurchTV({
+          nowPlaying: nowPlaying || mockChurchTV.nowPlaying,
+          moreToWatch: moreToWatch.length > 0 ? moreToWatch : mockChurchTV.moreToWatch
+        });
+
       } catch (err) {
         console.warn("Strapi fetch failed, using mock ChurchTV data");
         setChurchTV(mockChurchTV);
       }
     }
 
-    fetchChurchTV();
+    fetchContent();
+    const interval = setInterval(fetchContent, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   if (!churchTV) {
@@ -44,9 +108,8 @@ export default function ChurchTV() {
         </h2>
 
         <div
-          className={`rounded-lg overflow-hidden shadow-lg mb-12 transform transition-all duration-500 ${
-            inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-          }`}
+          className={`rounded-lg overflow-hidden shadow-lg mb-12 transform transition-all duration-500 ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+            }`}
         >
           <div className="relative w-full aspect-video">
             <iframe
@@ -74,14 +137,13 @@ export default function ChurchTV() {
             <Link
               key={video.id}
               href={`/media?video=${encodeURIComponent(video.id)}`}
-              className={`bg-white/30 backdrop-blur-md rounded-lg overflow-hidden shadow-lg transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl ${
-                inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-              }`}
+              className={`bg-white/30 backdrop-blur-md rounded-lg overflow-hidden shadow-lg transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                }`}
               style={{ transitionDelay: `${index * 150}ms` }}
             >
               <div className="relative">
                 <img
-                  src={video.thumbnail?.data?.attributes?.url}
+                  src={video.thumbnail?.data?.url}
                   alt={video.title}
                   className="w-full h-48 object-cover"
                 />

@@ -16,7 +16,7 @@ type Sermon = {
     title: string
     speaker?: string
     date?: string
-    youtubeId: string
+    youtubeId: string | null | undefined
     description?: string
     broadcastId?: string
 }
@@ -262,18 +262,24 @@ export default function SermonsPage() {
     }
 
     async function handleAddSermon() {
-        const id = extractYouTubeId(youtubeUrl)
-        if (!id) {
-            setError('Invalid YouTube URL or ID')
-            return
+        setError(null)
+        let id: string | undefined = undefined;
+        if (youtubeUrl !== '') {
+            const extractedId = extractYouTubeId(youtubeUrl)
+            id = extractedId === null ? undefined : extractedId
+            if (!id) {
+                setError('Invalid YouTube URL or ID')
+                return
+            }
         }
+
 
         try {
             await api.createSermon({  // Updated call
                 title: title || 'Untitled',
                 speaker,
                 date,
-                youtubeId: id
+                youtubeId: id ?? ''
             })
 
             setTitle('')

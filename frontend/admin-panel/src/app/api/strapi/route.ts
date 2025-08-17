@@ -5,6 +5,9 @@ const STRAPI_TOKEN = process.env.STRAPI_API_TOKEN
 
 async function strapiRequest(endpoint: string, options: RequestInit = {}) {
     const url = `${STRAPI_URL}/api/${endpoint}`
+    console.log('Making Strapi request:', url)
+
+
     const config: RequestInit = {
         headers: {
             'Content-Type': 'application/json',

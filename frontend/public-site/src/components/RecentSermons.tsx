@@ -36,12 +36,32 @@ export default function RecentSermons() {
   useEffect(() => {
     const fetchSermons = async () => {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/sermons?populate=*`
-        );
+        const res = await fetch('/api/strapi?endpoint=sermons&populate=*&sort[0]=date:desc&pagination[limit]=6');
         if (!res.ok) throw new Error("Failed to fetch sermons");
         const data = await res.json();
-        setSermons(data.data || []);
+
+        const formattedSermons = data.data.map((sermon: any) => ({
+          id: sermon.id,
+          attributes: {
+            title: sermon.title,
+            description: sermon.description?.[0]?.children?.[0]?.text || "Sermon description",
+            date: new Date(sermon.date).toLocaleDateString(),
+            preacher: sermon.speaker,
+            contentType: sermon.contentType || 'video',
+            youtubeId: sermon.youtubeId,
+            textContent: sermon.textContent,
+            link: `/sermons/${sermon.slug || sermon.id}`,
+            image: {
+              data: {
+                attributes: {
+                  url: sermon.thumbnail?.data?.url || "/placeholder.jpg"
+                }
+              }
+            },
+          },
+        }));
+
+        setSermons(formattedSermons);
       } catch (error) {
         console.warn("Fetching sermons failed, using mock data.", error);
         setSermons(mockSermons);
@@ -75,9 +95,8 @@ export default function RecentSermons() {
             return (
               <div
                 key={sermon.id}
-                className={`bg-white/40 backdrop-blur-md rounded-lg overflow-hidden shadow-lg transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl ${
-                  inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                }`}
+                className={`bg-white/40 backdrop-blur-md rounded-lg overflow-hidden shadow-lg transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                  }`}
                 style={{ transitionDelay: `${index * 150}ms` }}
               >
                 <img
