@@ -1,0 +1,42 @@
+{
+  "kind": "collectionType",
+  "collectionName": "live_streams",
+  "info": {
+    "singularName": "live-stream",
+    "pluralName": "live-streams",
+    "displayName": "Live Stream"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "streamUrl": {
+      "type": "text",
+      "required": true
+    },
+    "streamKey": {
+      "type": "text",
+      "required": true
+    },
+    "isLive": {
+      "type": "boolean",
+      "default": false
+    },
+    "title": {
+      "type": "string"
+    },
+    "startedAt": {
+      "type": "datetime"
+    },
+    "streamId": {
+      "type": "text"
+    },
+    "broadcastId": {
+      "type": "text"
+    },
+    "watchUrl": {
+      "type": "text"
+    }
+  }
+}

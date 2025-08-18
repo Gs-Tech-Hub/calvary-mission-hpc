@@ -1,0 +1,53 @@
+{
+  "kind": "collectionType",
+  "collectionName": "donations",
+  "info": {
+    "singularName": "donation",
+    "pluralName": "donations",
+    "displayName": "Donation"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "donor": {
+      "type": "string",
+      "required": true
+    },
+    "amount": {
+      "type": "decimal",
+      "required": true
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "Tithe",
+        "Offering",
+        "Building",
+        "Fund",
+        "Missions",
+        "Special"
+      ]
+    },
+    "method": {
+      "type": "enumeration",
+      "enum": [
+        "Cash",
+        "Bank Transfer",
+        "Online",
+        "Mobile Money",
+        "Cheque"
+      ]
+    },
+    "reference": {
+      "type": "text"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "date": {
+      "type": "date"
+    }
+  }
+}

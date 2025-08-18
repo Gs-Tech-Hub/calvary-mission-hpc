@@ -18,10 +18,10 @@ export default function LoginPage() {
         // 🚧 Mock login
         if (email === 'admin@church.com' && password === 'admin123') {
             Cookies.set('role', 'admin', { path: '/' })
-            router.push('/dashboard')
+            router.push('/admin')
         } else if (email === 'pastor@church.com') {
             Cookies.set('role', 'pastor', { path: '/' })
-            router.push('/dashboard')
+            router.push('/admin')
         } else {
             alert('Invalid credentials')
         }
