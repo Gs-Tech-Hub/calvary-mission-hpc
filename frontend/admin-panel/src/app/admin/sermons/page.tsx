@@ -680,7 +680,7 @@ export default function SermonsPage() {
                     <h3 className="font-semibold mb-2">Preview</h3>
                     {selected ? (
                         <div>
-                            <VideoEmbed videoId={selected.youtubeId} />
+                            <VideoEmbed videoId={selected.youtubeId ?? ""} />
                             <div className="mt-3 space-y-1">
                                 <h4 className="font-medium">{selected.title}</h4>
                                 {selected.speaker && (

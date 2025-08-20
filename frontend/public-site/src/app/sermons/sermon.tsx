@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { sermons as mockSermons, eventsDetails as mockEvents } from "@/lib/org";
 
 type ListItem = {
+
   id: number;
   title: string;
   description: string;
@@ -20,6 +21,7 @@ export default function SermonsEventsPage() {
   const [filter, setFilter] = useState("All");
   const [sermons, setSermons] = useState<ListItem[]>([]);
   const [events, setEvents] = useState<ListItem[]>([]);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -120,9 +122,8 @@ export default function SermonsEventsPage() {
           <button
             key={cat}
             onClick={() => setFilter(cat)}
-            className={`px-4 py-2 rounded-full border transition ${
-              filter === cat ? "bg-[#0A1D3C] text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-            }`}
+            className={`px-4 py-2 rounded-full border transition ${filter === cat ? "bg-[#0A1D3C] text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
           >
             {cat}
           </button>

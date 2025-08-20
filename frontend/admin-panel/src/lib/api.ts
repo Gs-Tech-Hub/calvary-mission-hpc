@@ -340,7 +340,16 @@ class ApiService {
             // Get the stream ID from the broadcast
             const streamId = broadcast.contentDetails?.boundStreamId
 
-            let streamData = null
+            type StreamStatus = {
+                status?: {
+                    streamStatus?: string
+                    healthStatus?: {
+                        status?: string
+                    }
+                }
+            }
+
+            let streamData: StreamStatus | null = null
 
             if (streamId) {
                 // Get specific stream data using the stream ID
@@ -355,7 +364,7 @@ class ApiService {
 
                 if (streamResponse.ok) {
                     const streamResponseData = await streamResponse.json()
-                    streamData = streamResponseData.items?.[0]
+                    streamData = streamResponseData.items?.[0] as StreamStatus
                 }
             }
 
@@ -372,7 +381,7 @@ class ApiService {
 
                 if (allStreamsResponse.ok) {
                     const allStreamsData = await allStreamsResponse.json()
-                    streamData = allStreamsData.items?.[0] // Get the latest stream
+                    streamData = allStreamsData.items?.[0] as StreamStatus // Get the latest stream
                 }
             }
 

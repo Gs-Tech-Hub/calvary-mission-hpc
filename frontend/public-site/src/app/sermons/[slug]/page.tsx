@@ -29,6 +29,7 @@ export default function SermonEventDetail() {
 
         const allItems = [...mockSermons, ...mockEvents];
         const found = allItems.find((i) => i.slug === slug);
+
         if (found) {
           setItem({
             title: found.title,
@@ -36,8 +37,10 @@ export default function SermonEventDetail() {
             fullDescription: found.fullDescription,
             video: "video" in found ? found.video : null,
             thumbnail: { data: { attributes: { url: found.thumbnail } } },
+        
           });
         }
+
       } finally {
         setLoading(false);
       }
