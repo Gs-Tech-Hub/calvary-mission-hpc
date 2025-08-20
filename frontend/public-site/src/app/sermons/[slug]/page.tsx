@@ -27,16 +27,35 @@ export default function SermonEventDetail() {
         console.log("Strapi fetch failed, using mock data");
 
         const allItems = [...mockSermons, ...mockEvents];
-        const found = allItems.find((i) => i.link.split("/").pop() === slug);
+        const found = allItems.find((i) => {
+          if ("link" in i) {
+            return i.link.split("/").pop() === slug;
+          }
+          if ("slug" in i) {
+            return i.slug === slug;
+          }
+          return false;
+        });
+
         if (found) {
           setItem({
             title: found.title,
             date: found.date,
-            fullDescription: found.fullDescription || found.description,
-            video: found.video || null,
-            thumbnail: { data: { attributes: { url: found.image || found.thumbnail } } },
+            fullDescription:
+              "fullDescription" in found
+                ? found.fullDescription
+                : found.description,
+            video: "video" in found ? found.video : null,
+            thumbnail: {
+              data: {
+                attributes: {
+                  url: "image" in found ? found.image : found.thumbnail,
+                },
+              },
+            },
           });
         }
+
       } finally {
         setLoading(false);
       }

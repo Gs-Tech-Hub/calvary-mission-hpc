@@ -10,18 +10,22 @@ export async function POST(request: NextRequest) {
         }
 
         switch (action) {
-            case 'create':
-                return await createLiveStream(accessToken, title)
-
-            case 'start':
-                return await startLiveStream(accessToken, broadcastId)
-
-            case 'stop':
-                return await stopLiveStream(accessToken, broadcastId)
-
-            case 'status':
-                return await getStreamStatus(accessToken, broadcastId)
-
+            case 'create': {
+                const stream = await createLiveStream(accessToken, title)
+                return NextResponse.json(stream)
+            }
+            case 'start': {
+                const started = await startLiveStream(accessToken, broadcastId)
+                return NextResponse.json(started)
+            }
+            case 'stop': {
+                const stopped = await stopLiveStream(accessToken, broadcastId)
+                return NextResponse.json(stopped)
+            }
+            case 'status': {
+                const status = await api.getStreamStatus(broadcastId)
+                return NextResponse.json(status)
+            }
             default:
                 return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
         }
@@ -30,6 +34,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: error.message }, { status: 500 })
     }
 }
+
 
 async function createLiveStream(accessToken: string, title: string) {
     try {
