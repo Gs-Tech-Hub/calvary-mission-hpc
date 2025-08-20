@@ -1,5 +1,5 @@
 "use client";
-
+/* eslint-disable @typescript-eslint/no-explicit-any */ 
 import { useState, useEffect } from "react";
 import { org as mockOrg } from "@/lib/org";
 
@@ -14,6 +14,7 @@ export default function Hero() {
         const data = await res.json();
         setHeroData(data.data.attributes);
       } catch (err) {
+        console.log(err);
         console.warn("Strapi fetch failed, using mock org hero data");
         setHeroData(mockOrg);
       }
@@ -45,6 +46,7 @@ export default function Hero() {
             }
           }
         } catch (err) {
+          console.log(err);
           console.log("No live stream available");
         }
       }

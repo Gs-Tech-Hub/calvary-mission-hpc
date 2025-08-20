@@ -1,10 +1,11 @@
 "use client";
-
+/* eslint-disable @typescript-eslint/no-explicit-any */ 
 import { useState, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import Link from "next/link";
 import { FaPlay } from "react-icons/fa";
 import { churchTV as mockChurchTV } from "@/lib/org";
+import Image from "next/image";
 
 type NowPlaying = {
   title: string;
@@ -164,7 +165,7 @@ export default function ChurchTV() {
               style={{ transitionDelay: `${index * 150}ms` }}
             >
               <div className="relative">
-                <img
+                <Image
                   src={video.thumbnail?.data?.url}
                   alt={video.title}
                   className="w-full h-48 object-cover"

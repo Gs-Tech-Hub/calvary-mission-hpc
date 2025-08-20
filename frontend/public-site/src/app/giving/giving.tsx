@@ -1,5 +1,5 @@
 "use client";
-
+/* eslint-disable @typescript-eslint/no-explicit-any */ 
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import Link from "next/link";
@@ -17,7 +17,7 @@ export default function GivingPage() {
         const json = await res.json();
         setData(json.data.attributes);
       } catch (err) {
-        console.log("Strapi fetch failed, using mock data");
+        console.log(`Strapi fetch failed, using mock data: ${err}`);
         setData(mockData);
       }
     }
@@ -74,7 +74,7 @@ export default function GivingPage() {
 
       <section className="bg-gray-100 py-16 text-center">
         <blockquote className="text-2xl italic text-gray-800 max-w-3xl mx-auto">
-          "{data.scripture?.quote}"
+          {`"${data.scripture?.quote}"`}
         </blockquote>
         <p className="mt-4 text-gray-600">— {data.scripture?.reference}</p>
       </section>

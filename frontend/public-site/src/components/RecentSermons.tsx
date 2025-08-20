@@ -1,5 +1,6 @@
 "use client";
-
+import Image from "next/image";
+/* eslint-disable @typescript-eslint/no-explicit-any */ 
 import { useState, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 
@@ -99,7 +100,7 @@ export default function RecentSermons() {
                   }`}
                 style={{ transitionDelay: `${index * 150}ms` }}
               >
-                <img
+                <Image
                   src={`${process.env.NEXT_PUBLIC_STRAPI_URL}${imgUrl}`}
                   alt={attributes.title}
                   className="w-full h-56 object-cover"

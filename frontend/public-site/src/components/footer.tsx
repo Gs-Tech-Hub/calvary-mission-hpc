@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Facebook, Instagram, Youtube } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -57,7 +58,10 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-center sm:text-left">
 
         <div>
-          <img src={org.logo} alt={org.name} className="h-12 mb-4 mx-auto sm:mx-0" />
+          <Image
+           src={org.logo} 
+           alt={org.name} 
+           className="h-12 mb-4 mx-auto sm:mx-0" />
           <p className="text-gray-600 text-sm">{org.description}</p>
         </div>
 

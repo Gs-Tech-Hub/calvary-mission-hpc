@@ -1,14 +1,15 @@
 "use client";
-
+/* eslint-disable @typescript-eslint/no-explicit-any */ 
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { sermons as mockSermons, eventsDetails as mockEvents } from "@/lib/org";
+import { sermonsDetails as mockSermons, eventsDetails as mockEvents } from "@/lib/org";
 
 export default function SermonEventDetail() {
-  const { slug } = useParams();
+  const params = useParams();
+  const slug = Array.isArray(params?.slug) ? params.slug[0] : (params?.slug as string | undefined);
   const [item, setItem] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -24,35 +25,19 @@ export default function SermonEventDetail() {
         const data = await res.json();
         setItem(data.data[0].attributes);
       } catch (err) {
-        console.log("Strapi fetch failed, using mock data");
+        console.log(`Strapi fetch failed, using mock data: ${err}`);
 
         const allItems = [...mockSermons, ...mockEvents];
-        const found = allItems.find((i) => {
-          if ("link" in i) {
-            return i.link.split("/").pop() === slug;
-          }
-          if ("slug" in i) {
-            return i.slug === slug;
-          }
-          return false;
-        });
+        const found = allItems.find((i) => i.slug === slug);
 
         if (found) {
           setItem({
             title: found.title,
             date: found.date,
-            fullDescription:
-              "fullDescription" in found
-                ? found.fullDescription
-                : found.description,
+            fullDescription: found.fullDescription,
             video: "video" in found ? found.video : null,
-            thumbnail: {
-              data: {
-                attributes: {
-                  url: "image" in found ? found.image : found.thumbnail,
-                },
-              },
-            },
+            thumbnail: { data: { attributes: { url: found.thumbnail } } },
+        
           });
         }
 

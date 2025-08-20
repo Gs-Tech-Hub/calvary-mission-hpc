@@ -1,6 +1,8 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */ 
 import { useState, useEffect } from "react";
 import { mediaVideos as mockVideos } from "@/lib/org";
+import Image from "next/image";
 
 export default function MediaPage() {
   const [mediaVideos, setMediaVideos] = useState<any[]>([]);
@@ -52,7 +54,7 @@ export default function MediaPage() {
         setCurrentVideo(allVideos.length > 0 ? allVideos[0] : mockVideos[0]);
 
       } catch (err) {
-        console.log("Strapi fetch failed, using mock data");
+        console.log(`Strapi fetch failed, using mock data: ${err}`);
         setMediaVideos(mockVideos);
         setCurrentVideo(mockVideos[0]);
       } finally {
@@ -102,7 +104,7 @@ export default function MediaPage() {
             className="flex gap-3 items-center cursor-pointer hover:bg-gray-100 p-2 rounded-lg transition"
             onClick={() => setCurrentVideo(video)}
           >
-            <img
+            <Image
               src={video.thumbnail}
               alt={video.title}
               className="w-32 h-20 object-cover rounded-lg"
