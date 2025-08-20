@@ -1,5 +1,5 @@
 "use client";
-
+/* eslint-disable @typescript-eslint/no-explicit-any */ 
 import { useState, useEffect } from "react";
 
 type TimeLeft = {
@@ -40,7 +40,7 @@ export default function Countdown() {
         // For now, using mock data
         setContent({ ...mockSermon, isLive: false });
       } catch (err) {
-        console.warn("Strapi fetch failed, using mock sermon");
+        console.warn(`Strapi fetch failed, using mock sermon: ${err}`);
         setContent({ ...mockSermon, isLive: false });
       }
     }

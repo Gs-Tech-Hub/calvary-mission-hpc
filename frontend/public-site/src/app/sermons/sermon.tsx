@@ -1,15 +1,25 @@
 "use client";
-
+/* eslint-disable @typescript-eslint/no-explicit-any */ 
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { sermons as mockSermons, eventsDetails as mockEvents } from "@/lib/org";
 
+type ListItem = {
+  id: number;
+  title: string;
+  description: string;
+  date: string;
+  category: "Sermon" | "Event";
+  slug: string;
+  thumbnail: string;
+};
+
 export default function SermonsEventsPage() {
   const [filter, setFilter] = useState("All");
-  const [sermons, setSermons] = useState([]);
-  const [events, setEvents] = useState([]);
+  const [sermons, setSermons] = useState<ListItem[]>([]);
+  const [events, setEvents] = useState<ListItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,7 +34,7 @@ export default function SermonsEventsPage() {
 
         const [sermonsData, eventsData] = await Promise.all([sermonsRes.json(), eventsRes.json()]);
 
-        const sermonsFormatted = sermonsData.data.map((item) => ({
+        const sermonsFormatted = sermonsData.data.map((item: { id: any; attributes: { title: any; description: any; date: any; slug: any; thumbnail: { data: { attributes: { url: any; }; }; }; }; }) => ({
           id: item.id,
           title: item.attributes.title,
           description: item.attributes.description,
@@ -34,7 +44,7 @@ export default function SermonsEventsPage() {
           thumbnail: `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.attributes.thumbnail.data.attributes.url}`,
         }));
 
-        const eventsFormatted = eventsData.data.map((item) => ({
+        const eventsFormatted = eventsData.data.map((item: { id: any; attributes: { title: any; description: any; date: any; slug: any; thumbnail: { data: { attributes: { url: any; }; }; }; }; }) => ({
           id: item.id,
           title: item.attributes.title,
           description: item.attributes.description,
@@ -55,7 +65,7 @@ export default function SermonsEventsPage() {
             description: s.description,
             date: s.date,
             category: "Sermon",
-            slug: s.link.split("/").pop(),
+            slug: s.link.split("/").pop() as string,
             thumbnail: s.image,
           }))
         );

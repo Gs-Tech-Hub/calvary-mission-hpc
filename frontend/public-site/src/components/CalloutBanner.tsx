@@ -1,5 +1,5 @@
 "use client";
-
+/* eslint-disable @typescript-eslint/no-explicit-any */ 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ export default function CalloutBanner() {
         const data = await res.json();
         setBanner(data.data.attributes);
       } catch (err) {
-        console.warn("Strapi fetch failed, using default banner");
+        console.warn(`Strapi fetch failed, using default banner: ${err}`);
 
         setBanner({
           heading: "Welcome to Our Church",

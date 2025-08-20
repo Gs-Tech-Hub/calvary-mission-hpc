@@ -1,8 +1,9 @@
 "use client";
-
+/* eslint-disable @typescript-eslint/no-explicit-any */ 
 import { useState, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { aboutUs as mockAboutUs } from "@/lib/org"; 
+import Image from "next/image";
 
 export default function AboutUs() {
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.2 });
@@ -76,7 +77,7 @@ export default function AboutUs() {
               key={index}
               className="overflow-hidden bg-white rounded-lg shadow-lg hover:scale-105 transition-transform"
             >
-              <img
+              <Image
                 src={img?.data?.attributes?.url || img?.url || "/gallery-fallback.jpg"}
                 alt={`Gallery ${index + 1}`}
                 className="w-full h-40 object-cover"

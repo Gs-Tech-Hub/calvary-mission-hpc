@@ -1,10 +1,11 @@
 "use client";
-
+/* eslint-disable @typescript-eslint/no-explicit-any */ 
 import { useState, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { motion } from "framer-motion";
 import { FaPhone, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
 import { aboutContent, org } from "@/lib/org";
+import Image from "next/image";
 
 export default function AboutPage() {
   const [aboutData, setAboutData] = useState<any>(null);
@@ -20,7 +21,7 @@ export default function AboutPage() {
         const json = await res.json();
         setAboutData(json.data.attributes);
       } catch (err) {
-        console.log("Strapi fetch failed, using mock data");
+        console.log(`Strapi fetch failed, using mock data: ${err}`);
         setAboutData({
           heroImage: { url: org.heroImage },
           welcomeTitle: aboutContent.welcome.title,
@@ -88,7 +89,7 @@ export default function AboutPage() {
             className="grid grid-cols-3 gap-2"
           >
             {aboutData.welcomeImages.data.map((img: any, i: number) => (
-              <img
+              <Image
                 key={i}
                 src={img.attributes.url}
                 alt={`Gallery ${i + 1}`}
@@ -124,7 +125,7 @@ export default function AboutPage() {
               animate={timelineInView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.8 }}
             >
-              <img
+              <Image
                 src={aboutData.timelineImage.url}
                 alt="Timeline"
                 className="w-full h-full object-cover rounded-lg shadow-lg"
