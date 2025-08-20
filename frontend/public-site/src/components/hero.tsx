@@ -101,18 +101,6 @@ export default function Hero() {
           </div>
 
         </div>
-        <div className="w-full md:w-1/2 flex justify-center">
-          <div className="rounded-lg overflow-hidden shadow-lg max-w-sm w-full">
-            <video
-              className="w-full h-auto rounded-lg"
-              controls
-              poster="/video-thumbnail.jpg"
-            >
-              <source src="/sermon-video.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        </div>
       </div>
     </section>
   );
