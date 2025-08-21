@@ -130,31 +130,6 @@ export default function ChurchTV() {
           Watch Live & On Demand
         </h2>
 
-        <div
-          className={`rounded-lg overflow-hidden shadow-lg mb-12 transform transition-all duration-500 ${inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-            }`}
-        >
-          <div className="relative w-full aspect-video">
-            <iframe
-              src={`${churchTV.nowPlaying?.videoUrl}?autoplay=1`}
-              className="w-full h-full"
-              allow="autoplay; fullscreen"
-            ></iframe>
-          </div>
-          <div className="bg-[#0A1D3C] text-white p-6">
-            <h3 className="text-2xl font-bold mb-2">
-              {churchTV.nowPlaying?.title}
-            </h3>
-            <p className="mb-4">{churchTV.nowPlaying?.description}</p>
-            <Link
-              href="/media"
-              className="flex items-center gap-2 px-6 py-3 bg-white text-[#0A1D3C] font-semibold rounded-lg hover:bg-gray-200 transition-all w-fit"
-            >
-              <FaPlay /> View All Media
-            </Link>
-          </div>
-        </div>
-
         <div className="grid gap-6 md:grid-cols-3">
           {churchTV.moreToWatch?.map((video: any, index: number) => (
             <Link
