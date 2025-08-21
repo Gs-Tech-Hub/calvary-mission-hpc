@@ -1,0 +1,362 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User authentication and roles
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  role      UserRole @default(MEMBER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  memberships Member[]
+  donations   Donation[]
+  events      Event[]
+  livestreams Livestream[]
+  payments    Payment[]
+  sermons     Sermon[]
+  articles    Article[]
+  podcastEpisodes PodcastEpisode[]
+  podcastSeries PodcastSeries[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  PASTOR
+  STAFF
+  MEMBER
+  GUEST
+}
+
+// Church membership management
+model Member {
+  id            Int      @id @default(autoincrement())
+  userId        Int      @unique
+  memberNumber  String   @unique
+  phone         String?
+  address       String?
+  dateOfBirth   DateTime?
+  joinDate      DateTime @default(now())
+  membershipType MembershipType @default(REGULAR)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  donations Donation[]
+  events    Event[]
+  payments  Payment[]
+
+  @@map("members")
+}
+
+enum MembershipType {
+  REGULAR
+  YOUTH
+  SENIOR
+  VISITOR
+  ONLINE
+}
+
+// Donation management
+model Donation {
+  id          Int           @id @default(autoincrement())
+  memberId    Int?
+  userId      Int?
+  amount      Float
+  currency    String        @default("USD")
+  type        DonationType
+  category    DonationCategory
+  description String?
+  isAnonymous Boolean       @default(false)
+  date        DateTime      @default(now())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  member Member? @relation(fields: [memberId], references: [id])
+  user   User?  @relation(fields: [userId], references: [id])
+
+  @@map("donations")
+}
+
+enum DonationType {
+  TITHING
+  OFFERING
+  SPECIAL_OFFERING
+  MISSION
+  BUILDING_FUND
+  OTHER
+}
+
+enum DonationCategory {
+  GENERAL
+  YOUTH_MINISTRY
+  MUSIC_MINISTRY
+  CHILDREN_MINISTRY
+  OUTREACH
+  MAINTENANCE
+  TECHNOLOGY
+  OTHER
+}
+
+// Payment processing
+model Payment {
+  id            Int           @id @default(autoincrement())
+  memberId      Int?
+  userId        Int?
+  amount        Float
+  currency      String        @default("USD")
+  type          PaymentType
+  status        PaymentStatus @default(PENDING)
+  paymentMethod PaymentMethod
+  transactionId String?       @unique
+  description   String?
+  date          DateTime      @default(now())
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  member Member? @relation(fields: [memberId], references: [id])
+  user   User?  @relation(fields: [userId], references: [id])
+
+  @@map("payments")
+}
+
+enum PaymentType {
+  DONATION
+  EVENT_REGISTRATION
+  MEMBERSHIP_FEE
+  BOOKING_FEE
+  OTHER
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH
+  CHECK
+  CREDIT_CARD
+  DEBIT_CARD
+  BANK_TRANSFER
+  ONLINE_PAYMENT
+  MOBILE_PAYMENT
+}
+
+// Livestream management
+model Livestream {
+  id          Int             @id @default(autoincrement())
+  title       String
+  description String?
+  streamKey   String          @unique
+  rtmpUrl     String
+  isActive    Boolean         @default(false)
+  isLive      Boolean         @default(false)
+  startTime   DateTime?
+  endTime     DateTime?
+  createdBy   Int
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  // Relations
+  user User @relation(fields: [createdBy], references: [id])
+
+  @@map("livestreams")
+}
+
+// Event management
+model Event {
+  id          Int         @id @default(autoincrement())
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  location    String?
+  maxCapacity Int?
+  isActive    Boolean     @default(true)
+  createdBy   Int
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  user    User     @relation(fields: [createdBy], references: [id])
+  members Member[]
+
+  @@map("events")
+}
+
+// Church service schedule
+model Service {
+  id          Int      @id @default(autoincrement())
+  name        String
+  dayOfWeek   Int      // 0 = Sunday, 1 = Monday, etc.
+  startTime   String   // Format: "09:00"
+  endTime     String   // Format: "10:30"
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("services")
+}
+
+// Ministry groups
+model Ministry {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  leaderId    Int?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("ministries")
+}
+
+// Attendance tracking
+model Attendance {
+  id        Int      @id @default(autoincrement())
+  memberId  Int
+  serviceId Int
+  date      DateTime
+  status    AttendanceStatus @default(PRESENT)
+  createdAt DateTime @default(now())
+
+  @@map("attendance")
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+// Sermon management
+model Sermon {
+  id          Int           @id @default(autoincrement())
+  title       String
+  description String?
+  content     String?       // Text content for the sermon
+  scripture   String?       // Bible verses referenced
+  speaker     String        // Pastor/Preacher name
+  date        DateTime      @default(now())
+  duration    Int?          // Duration in minutes
+  audioUrl    String?       // URL to audio file
+  videoUrl    String?       // URL to video file
+  thumbnail   String?       // Thumbnail image URL
+  tags        Json?         // Array of tags stored as JSON
+  isPublished Boolean       @default(false)
+  isFeatured  Boolean       @default(false)
+  viewCount   Int           @default(0)
+  createdBy   Int
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  user User @relation(fields: [createdBy], references: [id])
+
+  @@map("sermons")
+}
+
+// Article management
+model Article {
+  id          Int           @id @default(autoincrement())
+  title       String
+  content     String        // Full article content
+  excerpt     String?       // Short summary
+  author      String        // Author name
+  category    ArticleCategory
+  tags        Json?         // Array of tags stored as JSON
+  featuredImage String?     // Featured image URL
+  isPublished Boolean       @default(false)
+  isFeatured  Boolean       @default(false)
+  viewCount   Int           @default(0)
+  readTime    Int?          // Estimated read time in minutes
+  publishedAt DateTime?
+  createdBy   Int
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  user User @relation(fields: [createdBy], references: [id])
+
+  @@map("articles")
+}
+
+enum ArticleCategory {
+  DEVOTIONAL
+  BIBLE_STUDY
+  CHURCH_NEWS
+  MINISTRY_UPDATE
+  TESTIMONY
+  TEACHING
+  INSPIRATIONAL
+  OTHER
+}
+
+// Podcast episode management
+model PodcastEpisode {
+  id          Int               @id @default(autoincrement())
+  title       String
+  description String?
+  content     String?           // Show notes or transcript
+  audioUrl    String            // URL to audio file
+  duration    Int               // Duration in seconds
+  episodeNumber Int?            // Episode number in series
+  season      Int?              // Season number
+  thumbnail   String?           // Episode thumbnail
+  tags        Json?             // Array of tags stored as JSON
+  isPublished Boolean           @default(false)
+  isFeatured  Boolean           @default(false)
+  downloadCount Int             @default(0)
+  playCount   Int               @default(0)
+  publishedAt DateTime?
+  createdBy   Int
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  // Relations
+  user User @relation(fields: [createdBy], references: [id])
+
+  @@map("podcast_episodes")
+}
+
+// Podcast series/seasons
+model PodcastSeries {
+  id          Int           @id @default(autoincrement())
+  title       String
+  description String?
+  thumbnail   String?       // Series thumbnail
+  isActive    Boolean       @default(true)
+  createdBy   Int
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  user User @relation(fields: [createdBy], references: [id])
+
+  @@map("podcast_series")
+}
