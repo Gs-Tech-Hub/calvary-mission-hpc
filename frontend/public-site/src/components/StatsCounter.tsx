@@ -23,7 +23,7 @@ export default function StatsCounter() {
   useEffect(() => {
     async function fetchStats() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/stats`);
+        const res = await fetch('/api/strapi?endpoint=stats');
         if (!res.ok) throw new Error("Failed to fetch stats");
         const data = await res.json();
 

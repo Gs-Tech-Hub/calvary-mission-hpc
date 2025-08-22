@@ -28,8 +28,8 @@ export default function SermonsEventsPage() {
     async function fetchData() {
       try {
         const [sermonsRes, eventsRes] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/sermons?populate=*`),
-          fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/events?populate=*`),
+          fetch('/api/strapi?endpoint=sermons&populate=*'),
+          fetch('/api/strapi?endpoint=events&populate=*'),
         ]);
 
         if (!sermonsRes.ok || !eventsRes.ok) throw new Error("Strapi not ready");
@@ -43,7 +43,7 @@ export default function SermonsEventsPage() {
           date: item.attributes.date,
           category: "Sermon",
           slug: item.attributes.slug,
-          thumbnail: `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.attributes.thumbnail.data.attributes.url}`,
+          thumbnail: item.attributes.thumbnail.data.attributes.url.startsWith("http") ? item.attributes.thumbnail.data.attributes.url : item.attributes.thumbnail.data.attributes.url,
         }));
 
         const eventsFormatted = eventsData.data.map((item: { id: any; attributes: { title: any; description: any; date: any; slug: any; thumbnail: { data: { attributes: { url: any; }; }; }; }; }) => ({
@@ -53,7 +53,7 @@ export default function SermonsEventsPage() {
           date: item.attributes.date,
           category: "Event",
           slug: item.attributes.slug,
-          thumbnail: `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.attributes.thumbnail.data.attributes.url}`,
+          thumbnail: item.attributes.thumbnail.data.attributes.url.startsWith("http") ? item.attributes.thumbnail.data.attributes.url : item.attributes.thumbnail.data.attributes.url,
         }));
 
         setSermons(sermonsFormatted);

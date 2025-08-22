@@ -29,7 +29,7 @@ export default function Testimonials() {
   useEffect(() => {
     async function fetchTestimonials() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/testimonials?populate=image`);
+        const res = await fetch('/api/strapi?endpoint=testimonials&populate=image');
         if (!res.ok) throw new Error("Failed to fetch testimonials");
         const data = await res.json();
 
@@ -39,7 +39,7 @@ export default function Testimonials() {
           role: item?.attributes?.role || "",
           quote: item?.attributes?.quote || "",
           image: item?.attributes?.image?.data?.attributes?.url
-            ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.attributes.image.data.attributes.url}`
+            ? item.attributes.image.data.attributes.url.startsWith("http") ? item.attributes.image.data.attributes.url : item.attributes.image.data.attributes.url
             : "/default-avatar.jpg",
         })) || [];
 

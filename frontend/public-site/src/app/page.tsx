@@ -1,5 +1,5 @@
 import Navbar from "@/components/navbar";
-import Hero from "@/components/hero";
+import Hero from "@/components/heros";
 import Countdown from "@/components/Countdown";
 import StatsCounter from "@/components/StatsCounter";
 import RecentSermons from "@/components/RecentSermons";

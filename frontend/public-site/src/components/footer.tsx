@@ -7,28 +7,28 @@ import { useState, useEffect } from "react";
 
 export default function Footer() {
   const [org, setOrg] = useState({
-    name: "TheChurch",
+    name: "Calvary Mission HPC",
     description: "Welcome to our church website.",
-    logo: "/logo.png",
-    address: "123 Church Street, City",
-    phone: "+234 800 000 0000",
-    email: "info@thechurch.com",
+    logo: "/logo.svg",
+    address: "26 Dein Street, Agbor, Nigeria",
+    phone: "+234 808 870 8005",
+    email: "info@calvarymissionhpc.org",
     socials: {
-      facebook: "#",
-      instagram: "#",
-      youtube: "#",
+      facebook: "https://facebook.com/calvarymissionhpc",
+      instagram: "https://instagram.com/calvarymissionhpc",
+      youtube: "https://youtube.com/calvarymissionhpc",
     },
   });
 
   useEffect(() => {
     async function fetchOrg() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/org?populate=*`);
+        const res = await fetch('/api/strapi?endpoint=orgs&populate=*');
         if (!res.ok) throw new Error("Failed to fetch org");
         const data = await res.json();
-        const orgData = data.data.attributes;
+        const orgData = data.data;
         setOrg({
-          name: orgData.name || "TheChurch",
+          name: orgData.name || "Calvary Mission HPC",
           description: orgData.description || org.description,
           logo: orgData.logo?.data?.attributes?.url || org.logo,
           address: orgData.address || org.address,
@@ -61,6 +61,8 @@ export default function Footer() {
           <Image
            src={org.logo} 
            alt={org.name} 
+           width={100}
+           height={100}
            className="h-12 mb-4 mx-auto sm:mx-0" />
           <p className="text-gray-600 text-sm">{org.description}</p>
         </div>

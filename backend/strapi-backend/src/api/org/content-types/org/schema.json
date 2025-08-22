@@ -1,0 +1,47 @@
+{
+  "kind": "collectionType",
+  "collectionName": "orgs",
+  "info": {
+    "singularName": "org",
+    "pluralName": "orgs",
+    "displayName": "Org"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "logo": {
+      "type": "string"
+    },
+    "heroImage": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "email"
+    },
+    "socials": {
+      "type": "component",
+      "component": "org.socials",
+      "repeatable": false
+    },
+    "heroText": {
+      "type": "component",
+      "component": "org.hero-text",
+      "repeatable": false
+    }
+  }
+}

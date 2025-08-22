@@ -32,10 +32,11 @@ export default function Navbar() {
   useEffect(() => {
     async function fetchOrg() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/org?populate=*`);
+        const res = await fetch('/api/strapi?endpoint=orgs&populate=*');
         if (!res.ok) throw new Error("Failed to fetch org");
         const data = await res.json();
-        setOrgName(data.data.attributes.name || "TheChurch");
+        console.log(data.data[0].name);
+        setOrgName(data.data[0].name || "TheChurch");
       } catch (err) {
         console.error(err);
       }

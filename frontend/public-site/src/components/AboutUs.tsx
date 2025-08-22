@@ -13,7 +13,7 @@ export default function AboutUs() {
     async function fetchAboutUs() {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/about-us?populate[features]=*&populate[gallery]=*`
+          '/api/strapi?endpoint=about-us&populate[features]=*&populate[gallery]=*'
         );
         if (!res.ok) throw new Error("Failed to fetch About Us data");
         const data = await res.json();
@@ -80,6 +80,8 @@ export default function AboutUs() {
               <Image
                 src={img?.data?.attributes?.url || img?.url || "/gallery-fallback.jpg"}
                 alt={`Gallery ${index + 1}`}
+                width={500}
+                height={500}
                 className="w-full h-40 object-cover"
               />
             </div>

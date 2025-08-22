@@ -1,0 +1,18 @@
+{
+  "collectionName": "components_org_socials",
+  "info": {
+    "displayName": "Socials",
+    "icon": "link"
+  },
+  "attributes": {
+    "facebook": {
+      "type": "string"
+    },
+    "instagram": {
+      "type": "string"
+    },
+    "youtube": {
+      "type": "string"
+    }
+  }
+}

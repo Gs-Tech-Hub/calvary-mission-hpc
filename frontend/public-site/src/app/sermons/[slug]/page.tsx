@@ -17,7 +17,7 @@ export default function SermonEventDetail() {
     async function fetchData() {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/sermons-and-events?filters[slug][$eq]=${slug}&populate=*`
+          `/api/strapi?endpoint=sermons-and-events&filters[slug][$eq]=${slug}&populate=*`
         );
 
         if (!res.ok) throw new Error("Strapi not ready");
@@ -69,7 +69,7 @@ export default function SermonEventDetail() {
     <div className="bg-white min-h-screen">
       <section className="relative h-[40vh] flex items-center justify-center text-white">
         <Image
-          src={item.thumbnail.data.attributes.url.startsWith("http") ? item.thumbnail.data.attributes.url : `${process.env.NEXT_PUBLIC_STRAPI_URL}${item.thumbnail.data.attributes.url}`}
+          src={item.thumbnail.data.attributes.url.startsWith("http") ? item.thumbnail.data.attributes.url : item.thumbnail.data.attributes.url}
           alt={item.title}
           fill
           className="object-cover"

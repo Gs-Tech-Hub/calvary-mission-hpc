@@ -107,6 +107,8 @@ export default function MediaPage() {
             <Image
               src={video.thumbnail}
               alt={video.title}
+              width={100}
+              height={100}
               className="w-32 h-20 object-cover rounded-lg"
             />
             <div className="flex flex-col">
