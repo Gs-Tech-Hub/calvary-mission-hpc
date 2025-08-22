@@ -95,7 +95,11 @@ export default function SermonEventDetail() {
               width="100%"
               height="400"
               className="rounded-lg shadow-lg"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
+              frameBorder="0"
+              loading="lazy"
+              referrerPolicy="strict-origin-when-cross-origin"
             />
           </motion.div>
         )}

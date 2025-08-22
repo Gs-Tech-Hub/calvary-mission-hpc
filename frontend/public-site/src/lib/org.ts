@@ -282,9 +282,9 @@ export const givingInfo = {
     },
     {
       title: "Give Online",
-      details: "Secure online giving via Paystack.",
-      link: "https://paystack.com/pay/example",
-      buttonText: "Give via Paystack",
+      details: "Secure online giving via our donation form with multiple payment options.",
+      link: "#donation-form",
+      buttonText: "Give Online",
     },
     {
       title: "Mobile Money",
@@ -295,7 +295,7 @@ export const givingInfo = {
     quote: "Each of you should give what you have decided in your heart to give...",
     reference: "2 Corinthians 9:7",
   },
-  ctaLink: "https://paystack.com/pay/example",
+  ctaLink: "#donation-form",
 };
 export const aboutContent = {
   welcome: {

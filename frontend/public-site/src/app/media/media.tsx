@@ -40,7 +40,7 @@ export default function MediaPage() {
             id: sermon.id,
             title: sermon.title,
             description: sermon.description?.[0]?.children?.[0]?.text || "Sermon description",
-            videoUrl: sermon.youtubeId ? `https://www.youtube.com/embed/${sermon.youtubeId}` : '#',
+            videoUrl: sermon.youtubeId ? `https://www.youtube.com/embed/${sermon.youtubeId}?rel=0&modestbranding=1` : '#',
             thumbnail: sermon.thumbnail?.data?.url || "/placeholder.jpg",
             duration: "Sermon",
             contentType: sermon.contentType,
@@ -90,6 +90,7 @@ export default function MediaPage() {
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               className="w-full"
+              loading="lazy"
             ></iframe>
           )}
         </div>

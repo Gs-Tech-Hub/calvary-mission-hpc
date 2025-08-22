@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
+import { org } from "@/lib/org";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -16,7 +18,10 @@ const navLinks = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [orgName, setOrgName] = useState("TheChurch"); 
+  const [orgName, setOrgName] = useState(org.name);
+  const [logoUrl, setLogoUrl] = useState(org.logo);
+  const [logoError, setLogoError] = useState(false);
+  const [isApiLogo, setIsApiLogo] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -36,7 +41,17 @@ export default function Navbar() {
         if (!res.ok) throw new Error("Failed to fetch org");
         const data = await res.json();
         console.log(data.data[0].name);
-        setOrgName(data.data[0].name || "TheChurch");
+        setOrgName(data.data[0].name || org.name);
+        // If the API returns a logo, use it; otherwise keep the default
+        if (data.data[0].logo) {
+          setLogoUrl(data.data[0].logo);
+          setIsApiLogo(true);
+        } else {
+          // Fallback to local logo if API doesn't provide one
+          setLogoUrl(org.logo);
+          setIsApiLogo(false);
+        }
+
       } catch (err) {
         console.error(err);
       }
@@ -44,10 +59,36 @@ export default function Navbar() {
     fetchOrg();
   }, []);
 
+
+
   return (
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? "shadow-md bg-[#0A1D3C]" : "bg-[#0A1D3C]"}`}>
       <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto text-white">
-        <div className="text-xl font-bold">{orgName}</div>
+        <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+          {!logoError && (
+            <Image
+              src={logoUrl}
+              alt={`${orgName} Logo`}
+              width={50}
+              height={50} 
+              color="white"
+              className="w-10 h-10"
+              priority
+              onError={() => {
+                if (isApiLogo) {
+                  // If API logo fails, fall back to local logo
+                  setLogoUrl(org.logo);
+                  setIsApiLogo(false);
+                  setLogoError(false);
+                } else {
+                  // If local logo also fails, hide logo
+                  setLogoError(true);
+                }
+              }}
+            />
+          )}
+          <div className="text-xl font-bold">{orgName}</div>
+        </Link>
 
         <ul className="hidden md:flex space-x-6">
           {navLinks.map((link) => (
