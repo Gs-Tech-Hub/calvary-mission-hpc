@@ -44,12 +44,19 @@ export default function ChurchTV() {
           const liveData = await liveRes.json();
           if (liveData.data.length > 0) {
             const live = liveData.data[0];
-            nowPlaying = {
-              title: `🔴 ${live.title} (LIVE)`,
-              description: "Join us for our live service",
-              videoUrl: live.watchUrl,
-              isLive: true
-            };
+                         // Convert YouTube watch URL to embed URL for live streams
+             let videoUrl = live.watchUrl;
+             if (live.watchUrl && live.watchUrl.includes('youtube.com/watch?v=')) {
+               const videoId = live.watchUrl.split('v=')[1];
+               videoUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&autoplay=1`;
+             }
+             
+             nowPlaying = {
+               title: `🔴 ${live.title} (LIVE)`,
+               description: "Join us for our live service",
+               videoUrl: videoUrl,
+               isLive: true
+             };
           }
         }
 
@@ -63,9 +70,9 @@ export default function ChurchTV() {
               let videoUrl = '';
 
               // Handle different content types
-              if (sermon.contentType === 'video' && sermon.youtubeId) {
-                videoUrl = `https://www.youtube.com/embed/${sermon.youtubeId}`;
-              }
+                             if (sermon.contentType === 'video' && sermon.youtubeId) {
+                   videoUrl = `https://www.youtube.com/embed/${sermon.youtubeId}?rel=0&modestbranding=1`;
+               }
 
               nowPlaying = {
                 title: sermon.title,
@@ -90,11 +97,11 @@ export default function ChurchTV() {
             thumbnail: {
               data: {
                 attributes: {
-                  url: sermon.thumbnail?.data?.url || "/placeholder.jpg"
+                  url: sermon.thumbnail?.data?.url || "/img-1.jpg"
                 }
               }
             },
-            videoUrl: sermon.youtubeId ? `https://www.youtube.com/embed/${sermon.youtubeId}` : '#',
+                         videoUrl: sermon.youtubeId ? `https://www.youtube.com/embed/${sermon.youtubeId}?rel=0&modestbranding=1` : '#',
             contentType: sermon.contentType
           }));
         }

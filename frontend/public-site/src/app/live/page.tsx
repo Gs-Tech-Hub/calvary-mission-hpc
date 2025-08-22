@@ -17,13 +17,20 @@ export default function LivePage() {
           const liveData = await liveRes.json();
           if (liveData.data.length > 0) {
             const live = liveData.data[0];
-            setCurrentVideo({
-              id: `live-${live.id}`,
-              title: `🔴 ${live.title} (LIVE)`,
-              description: "Currently streaming live",
-              videoUrl: live.watchUrl,
-              isLive: true
-            });
+                         // Convert YouTube watch URL to embed URL for live streams
+             let videoUrl = live.watchUrl;
+             if (live.watchUrl && live.watchUrl.includes('youtube.com/watch?v=')) {
+               const videoId = live.watchUrl.split('v=')[1];
+               videoUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&autoplay=1`;
+             }
+             
+             setCurrentVideo({
+               id: `live-${live.id}`,
+               title: `🔴 ${live.title} (LIVE)`,
+               description: "Currently streaming live",
+               videoUrl: videoUrl,
+               isLive: true
+             });
             setLoading(false);
             return;
           }
@@ -39,7 +46,7 @@ export default function LivePage() {
               id: sermon.id,
               title: sermon.title,
               description: sermon.description?.[0]?.children?.[0]?.text || "Latest sermon",
-              videoUrl: sermon.youtubeId ? `https://www.youtube.com/embed/${sermon.youtubeId}` : '#',
+              videoUrl: sermon.youtubeId ? `https://www.youtube.com/embed/${sermon.youtubeId}?rel=0&modestbranding=1` : '#',
               isLive: false
             });
           }
@@ -76,15 +83,18 @@ export default function LivePage() {
           <div className="lg:col-span-2 space-y-6">
             <div className="rounded-xl overflow-hidden shadow bg-white">
               {currentVideo ? (
-                <iframe
-                  width="100%"
-                  height="400"
-                  src={currentVideo.videoUrl}
-                  title={currentVideo.title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="w-full"
-                ></iframe>
+                                     <iframe
+                    width="100%"
+                    height="400"
+                    src={currentVideo.videoUrl}
+                    title={currentVideo.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    className="w-full"
+                    frameBorder="0"
+                    loading="lazy"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                  ></iframe>
               ) : (
                 <div className="w-full h-[500px] bg-gray-100 flex items-center justify-center">
                   <p className="text-gray-500">No video available</p>
