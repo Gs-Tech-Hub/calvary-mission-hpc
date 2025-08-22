@@ -12,7 +12,7 @@ export default function GivingPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/giving-page?populate=*`);
+        const res = await fetch('/api/strapi?endpoint=giving-page&populate=*');
         if (!res.ok) throw new Error("Strapi not ready");
         const json = await res.json();
         setData(json.data.attributes);

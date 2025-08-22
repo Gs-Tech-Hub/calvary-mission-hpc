@@ -141,8 +141,10 @@ export default function ChurchTV() {
             >
               <div className="relative">
                 <Image
-                  src={video.thumbnail?.data?.url}
+                  src={video.thumbnail?.data?.url || "/img-1.jpg"}
                   alt={video.title}
+                  width={500}
+                  height={500}
                   className="w-full h-48 object-cover"
                 />
                 <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">

@@ -11,7 +11,7 @@ export default function CalloutBanner() {
     async function fetchBanner() {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/callout-banner`
+          '/api/strapi?endpoint=callout-banner'
         );
         if (!res.ok) throw new Error("Failed to fetch CalloutBanner data");
         const data = await res.json();

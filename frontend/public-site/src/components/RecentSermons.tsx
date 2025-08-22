@@ -55,7 +55,9 @@ export default function RecentSermons() {
             image: {
               data: {
                 attributes: {
-                  url: sermon.thumbnail?.data?.url || "/placeholder.jpg"
+                  url: sermon.thumbnail?.data?.url || "/placeholder.jpg",
+                  width: sermon.thumbnail?.data?.attributes?.width || 100,
+                  height: sermon.thumbnail?.data?.attributes?.height || 100,  
                 }
               }
             },
@@ -101,9 +103,11 @@ export default function RecentSermons() {
                 style={{ transitionDelay: `${index * 150}ms` }}
               >
                 <Image
-                  src={`${process.env.NEXT_PUBLIC_STRAPI_URL}${imgUrl}`}
+                  src={imgUrl.startsWith("http") ? imgUrl : imgUrl}
                   alt={attributes.title}
                   className="w-full h-56 object-cover"
+                  width={attributes.image?.data?.attributes?.width || 100}
+                  height={attributes.image?.data?.attributes?.height || 100}
                 />
                 <div className="p-6">
                   <h3 className="text-xl font-semibold text-gray-900">

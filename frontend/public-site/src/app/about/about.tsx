@@ -16,7 +16,7 @@ export default function AboutPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/about?populate=*`);
+        const res = await fetch('/api/strapi?endpoint=about-uses&populate=*');
         if (!res.ok) throw new Error("Strapi not ready");
         const json = await res.json();
         setAboutData(json.data.attributes);

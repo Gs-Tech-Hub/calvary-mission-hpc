@@ -1,0 +1,16 @@
+{
+  "collectionName": "components_org_hero_text",
+  "info": {
+    "displayName": "Hero Text",
+    "icon": "heading"
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "subtitle": {
+      "type": "text"
+    }
+  }
+}
