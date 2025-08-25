@@ -11,7 +11,6 @@ import {
   Heart, 
   GraduationCap, 
   Calendar, 
-  Prayer, 
   Users, 
   Gift, 
   LogOut,
@@ -22,16 +21,16 @@ import {
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: BookOpen },
-  { name: 'Sermons', href: '/sermons', icon: BookOpen },
+  { name: 'Sermons', href: '/dashboard/sermons', icon: BookOpen },
   { name: 'Entertainment', href: '/dashboard/entertainment', icon: Music },
   { name: 'News', href: '/dashboard/news', icon: Newspaper },
-  { name: 'Live TV', href: '/live', icon: Tv },
+  { name: 'Live TV', href: '/dashboard/live', icon: Tv },
   { name: 'Testimonies', href: '/dashboard/testimonies', icon: Heart },
   { name: 'Bible School', href: '/dashboard/bible-school', icon: GraduationCap },
   { name: 'Events', href: '/dashboard/events', icon: Calendar },
-  { name: 'Pray with Us', href: '/dashboard/prayer', icon: Prayer },
+  { name: 'Pray with Us', href: '/dashboard/prayer', icon: Heart },
   { name: 'Departments', href: '/dashboard/departments', icon: Users },
-  { name: 'Giving', href: '/giving', icon: Gift },
+  { name: 'Giving', href: '/dashboard/giving', icon: Gift },
 ];
 
 export default function DashboardNav() {
