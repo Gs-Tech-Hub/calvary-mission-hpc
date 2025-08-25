@@ -4,8 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User, LogOut } from "lucide-react";
 import { org } from "@/lib/org";
+import { useAuth } from "@/lib/auth-context";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -23,6 +24,7 @@ export default function Navbar() {
   const [logoError, setLogoError] = useState(false);
   const [isApiLogo, setIsApiLogo] = useState(false);
   const pathname = usePathname();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -108,6 +110,43 @@ export default function Navbar() {
           ))}
         </ul>
 
+        {/* Authentication Buttons */}
+        <div className="hidden md:flex items-center space-x-4">
+          {user ? (
+            <>
+              <Link
+                href="/dashboard"
+                className="flex items-center space-x-2 px-4 py-2 text-white hover:text-yellow-400 transition-colors"
+              >
+                <User className="h-4 w-4" />
+                <span>Dashboard</span>
+              </Link>
+              <button
+                onClick={logout}
+                className="flex items-center space-x-2 px-4 py-2 text-white hover:text-yellow-400 transition-colors"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/auth/login"
+                className="px-4 py-2 text-white hover:text-yellow-400 transition-colors"
+              >
+                Login
+              </Link>
+              <Link
+                href="/auth/register"
+                className="px-4 py-2 bg-yellow-400 text-[#0A1D3C] hover:bg-yellow-300 transition-colors rounded-md"
+              >
+                Register
+              </Link>
+            </>
+          )}
+        </div>
+
         <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden">
           {mobileMenuOpen ? <X /> : <Menu />}
         </button>
@@ -121,6 +160,49 @@ export default function Navbar() {
               </Link>
             </li>
           ))}
+          
+          {/* Mobile Authentication */}
+          <li className="pt-4 border-t border-gray-600">
+            {user ? (
+              <>
+                <Link 
+                  href="/dashboard" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center space-x-2 text-white hover:text-yellow-400 transition-colors"
+                >
+                  <User className="h-4 w-4" />
+                  <span>Dashboard</span>
+                </Link>
+                <button
+                  onClick={() => {
+                    logout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="flex items-center space-x-2 text-white hover:text-yellow-400 transition-colors mt-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Logout</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <Link 
+                  href="/auth/login" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-white hover:text-yellow-400 transition-colors"
+                >
+                  Login
+                </Link>
+                <Link 
+                  href="/auth/register" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-white hover:text-yellow-400 transition-colors mt-2"
+                >
+                  Register
+                </Link>
+              </>
+            )}
+          </li>
         </ul>
       </div>
     </nav>
