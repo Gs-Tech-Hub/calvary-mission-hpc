@@ -118,7 +118,7 @@ export default function LivePage() {
             <div className="rounded-xl shadow bg-white p-5">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Support the Mission</h3>
               <p className="text-gray-600 mb-4">Your generosity helps us reach more people.</p>
-              <Link href="/giving">
+              <Link href="/dashboard/giving">
                 <Button className="w-full h-11" size="lg">Donate</Button>
               </Link>
             </div>

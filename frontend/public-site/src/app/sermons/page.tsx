@@ -1,13 +1,5 @@
-import Navbar from "@/components/navbar";
-import SermonsEventsPage from "@/app/sermons/sermon";
-import Footer from "@/components/footer"
+import { redirect } from "next/navigation";
 
-export default function HomePage() {
-  return (
-    <>
-      <Navbar />
-      <SermonsEventsPage />
-      <Footer />
-    </>
-  );
+export default function SermonsRedirectPage() {
+  redirect("/dashboard/sermons");
 }

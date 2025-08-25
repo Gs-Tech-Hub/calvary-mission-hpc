@@ -10,10 +10,8 @@ import { useAuth } from "@/lib/auth-context";
 
 const navLinks = [
   { name: "Home", href: "/" },
-  { name: "Sermons", href: "/sermons" },
   { name: "About", href: "/about" },
-  { name: "Media", href: "/media" },
-  { name: "Giving", href: "/giving" },
+  { name: "Contact", href: "/contact" },
 ];
 
 export default function Navbar() {

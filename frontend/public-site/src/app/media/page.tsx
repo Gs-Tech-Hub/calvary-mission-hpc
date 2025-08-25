@@ -1,13 +1,5 @@
-import Navbar from "@/components/navbar";
-import MediaPage from "@/app/media/media";
-import Footer from "@/components/footer"
+import { redirect } from "next/navigation";
 
-export default function HomePage() {
-  return (
-    <>
-      <Navbar />
-      <MediaPage />
-      <Footer />
-    </>
-  );
+export default function MediaRedirectPage() {
+  redirect("/dashboard/entertainment");
 }
