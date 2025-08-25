@@ -1,0 +1,11 @@
+export default {
+  routes: [
+    { method: 'GET', path: '/onboardings', handler: 'onboarding.find', config: { policies: [] } },
+    { method: 'GET', path: '/onboardings/:id', handler: 'onboarding.findOne', config: { policies: [] } },
+    { method: 'POST', path: '/onboardings', handler: 'onboarding.create', config: { policies: [] } },
+    { method: 'PUT', path: '/onboardings/:id', handler: 'onboarding.update', config: { policies: [] } },
+    { method: 'DELETE', path: '/onboardings/:id', handler: 'onboarding.delete', config: { policies: [] } }
+  ]
+};
+
+
