@@ -48,10 +48,11 @@ async function fetchPostBySlug(slug: string): Promise<Post | null> {
   }
 }
 
-type PageProps = { params: { slug: string } };
+type PageProps = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const post = await fetchPostBySlug(params.slug);
+  const { slug } = await params;
+  const post = await fetchPostBySlug(slug);
   if (!post) return { title: 'Post not found' };
   const title = post.attributes.title || 'Post';
   const description = post.attributes.excerpt || undefined;
@@ -76,7 +77,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function PostDetailPage({ params }: PageProps) {
-  const post = await fetchPostBySlug(params.slug);
+  const { slug } = await params;
+  const post = await fetchPostBySlug(slug);
   if (!post) notFound();
 
   const attrs = post.attributes || {};

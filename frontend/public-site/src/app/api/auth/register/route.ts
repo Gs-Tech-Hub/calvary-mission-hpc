@@ -24,21 +24,41 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+    
+    // Ensure phone number is clean (remove any extra spaces or characters)
+    const cleanPhone = phone.trim().replace(/\s+/g, '')
+    if (!isValidE164Phone(cleanPhone)) {
+      return NextResponse.json(
+        { error: 'Invalid phone number format after cleaning' },
+        { status: 400 }
+      )
+    }
 
     // Register with Strapi using phone as password to satisfy local auth requirements
+    console.log('Attempting Strapi registration:', { username: fullName, email, phone: phone.substring(0, 8) + '...' })
+    
     const registerResponse = await fetch(`${STRAPI_URL}/api/auth/local/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ username: fullName, email, password: phone }),
+      body: JSON.stringify({ username: fullName, email, password: cleanPhone }),
     })
 
     const registerData = await registerResponse.json()
+    console.log('Strapi registration response status:', registerResponse.status)
+    console.log('Strapi registration response:', registerData)
 
     if (!registerResponse.ok) {
+      console.error('Strapi registration failed:', registerData)
+      console.error('Full error response:', {
+        status: registerResponse.status,
+        statusText: registerResponse.statusText,
+        headers: Object.fromEntries(registerResponse.headers.entries()),
+        body: registerData
+      })
       return NextResponse.json(
-        { error: registerData.error?.message || 'Registration failed' },
+        { error: registerData.error?.message || `Registration failed: ${registerResponse.status} ${registerResponse.statusText}` },
         { status: registerResponse.status }
       )
     }
@@ -46,63 +66,50 @@ export async function POST(request: NextRequest) {
     const jwt = registerData.jwt
     const userId = registerData.user?.id
 
-    // Create onboarding record per schema
-    const onboardingPayload: any = {
-      data: {
-        fullName,
-        email,
-        phone,
+    // Store additional profile data in the user's profile
+    if (userId && jwt) {
+      const profileData: any = {
+        phone: cleanPhone,
         address,
         isMember: !!isMember,
-        churchBranch: churchBranch || null,
         isChristian: !!isChristian,
         previousChurch: previousChurch || null,
       }
-    }
-    if (isMember) {
-      if (department) onboardingPayload.data.department = department
-    }
-    const onboardingRes = await fetch(`${STRAPI_URL}/api/onboardings`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(onboardingPayload),
-    })
-    if (!onboardingRes.ok) {
-      const err = await onboardingRes.json()
-      return NextResponse.json({ error: err.error?.message || 'Failed to create onboarding' }, { status: onboardingRes.status })
-    }
-
-    // If member, also create member profile
-    if (isMember) {
-      const memberPayload = {
-        data: {
-          name: fullName,
-          email,
-          phone,
-          address,
-          member_status: 'Active',
-          department: department || undefined,
-          joinDate: new Date().toISOString().slice(0,10),
-        }
+      
+      if (isMember) {
+        if (churchBranch) profileData.churchBranch = churchBranch
+        if (department) profileData.department = department
       }
-      const memberRes = await fetch(`${STRAPI_URL}/api/members`, {
-        method: 'POST',
+
+      // Update user profile with additional data
+      const profileRes = await fetch(`${STRAPI_URL}/api/users/${userId}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${jwt}`,
         },
-        body: JSON.stringify(memberPayload),
+        body: JSON.stringify(profileData),
       })
-      if (!memberRes.ok) {
-        const err = await memberRes.json()
-        return NextResponse.json({ error: err.error?.message || 'Failed to create member profile' }, { status: memberRes.status })
+      
+      if (!profileRes.ok) {
+        console.warn('Failed to update user profile, but registration succeeded:', await profileRes.text())
       }
     }
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       { 
-        user: { ...registerData.user, fullName, email, phone },
+        user: { 
+          ...registerData.user, 
+          fullName, 
+          email, 
+          phone: cleanPhone,
+          address,
+          isMember: !!isMember,
+          isChristian: !!isChristian,
+          previousChurch: previousChurch || null,
+          churchBranch: churchBranch || null,
+          department: department || null,
+        },
         jwt,
         message: 'Registration successful' 
       },
