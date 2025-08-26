@@ -19,6 +19,8 @@ export default function RegisterPage() {
     isChristian: false,
     previousChurch: '',
   });
+  const [countryCode, setCountryCode] = useState('NG');
+  const [dialCode, setDialCode] = useState('+234');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
@@ -33,6 +35,12 @@ export default function RegisterPage() {
   };
 
   const isValidE164Phone = (value: string) => /^\+[1-9]\d{7,14}$/.test(value);
+  const toE164 = (local: string) => {
+    const digits = local.replace(/\D/g, '');
+    const dialDigits = dialCode.replace(/\D/g, '');
+    const trimmed = digits.startsWith(dialDigits) ? digits.slice(dialDigits.length) : digits;
+    return `${dialCode}${trimmed}`;
+  };
 
   const nextStep = () => {
     if (step === 1 && (!formData.fullName || !formData.email)) {
@@ -43,8 +51,8 @@ export default function RegisterPage() {
       setError('Please fill in all required fields');
       return;
     }
-    if (step === 2 && !isValidE164Phone(formData.phone)) {
-      setError('Enter phone in E.164 format with country code, e.g. +2348012345678');
+    if (step === 2 && !isValidE164Phone(toE164(formData.phone))) {
+      setError('Enter a valid phone number');
       return;
     }
     setError('');
@@ -65,7 +73,7 @@ export default function RegisterPage() {
       const userData = {
         fullName: formData.fullName,
         email: formData.email,
-        phone: formData.phone,
+        phone: toE164(formData.phone),
         address: formData.address,
         isMember: formData.isMember,
         churchBranch: formData.churchBranch,
@@ -137,21 +145,42 @@ export default function RegisterPage() {
         <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
           Phone Number *
         </label>
-        <div className="mt-1 relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Phone className="h-5 w-5 text-gray-400" />
+        <div className="mt-1 grid grid-cols-3 gap-2">
+          <select
+            aria-label="Country"
+            value={countryCode}
+            onChange={(e) => {
+              const cc = e.target.value;
+              setCountryCode(cc);
+              const map: Record<string, string> = { NG: '+234', GH: '+233', US: '+1', GB: '+44', ZA: '+27', KE: '+254' };
+              setDialCode(map[cc] || '+234');
+            }}
+            className="col-span-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          >
+            <option value="NG">Nigeria (+234)</option>
+            <option value="GH">Ghana (+233)</option>
+            <option value="US">United States (+1)</option>
+            <option value="GB">United Kingdom (+44)</option>
+            <option value="ZA">South Africa (+27)</option>
+            <option value="KE">Kenya (+254)</option>
+          </select>
+          <div className="col-span-2 relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Phone className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              required
+              value={formData.phone}
+              onChange={handleInputChange}
+              className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+              placeholder="8012345678"
+            />
           </div>
-          <input
-            id="phone"
-            name="phone"
-            type="tel"
-            required
-            value={formData.phone}
-            onChange={handleInputChange}
-            className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-            placeholder="Enter your phone number"
-          />
         </div>
+        <p className="mt-1 text-xs text-gray-500">Your number will be saved as {dialCode} {formData.phone}.</p>
       </div>
 
       <div>

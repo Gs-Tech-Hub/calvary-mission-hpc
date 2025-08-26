@@ -7,13 +7,21 @@ import Link from 'next/link';
 import { Phone } from 'lucide-react';
 
 export default function LoginPage() {
-  const [phone, setPhone] = useState('');
+  const [countryCode, setCountryCode] = useState('NG');
+  const [dialCode, setDialCode] = useState('+234');
+  const [phoneLocal, setPhoneLocal] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
 
   const isValidE164Phone = (value: string) => /^\+[1-9]\d{7,14}$/.test(value);
+  const e164 = () => {
+    const digits = phoneLocal.replace(/\D/g, '');
+    const dialDigits = dialCode.replace(/\D/g, '');
+    const trimmed = digits.startsWith(dialDigits) ? digits.slice(dialDigits.length) : digits;
+    return `${dialCode}${trimmed}`;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,10 +29,11 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      if (!isValidE164Phone(phone)) {
+      const full = e164();
+      if (!isValidE164Phone(full)) {
         throw new Error('Enter phone in E.164 format with country code, e.g. +2348012345678');
       }
-      await login(phone);
+      await login(full);
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Login failed');
@@ -55,24 +64,46 @@ export default function LoginPage() {
           )}
           <div className="space-y-4">
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                Phone number (with country code)
+              <label className="block text-sm font-medium text-gray-700">
+                Phone number
               </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Phone className="h-5 w-5 text-gray-400" />
+              <div className="mt-1 grid grid-cols-3 gap-2">
+                <select
+                  aria-label="Country"
+                  value={countryCode}
+                  onChange={(e) => {
+                    const cc = e.target.value;
+                    setCountryCode(cc);
+                    // Minimal mapping. Extend as needed.
+                    const map: Record<string, string> = { NG: '+234', GH: '+233', US: '+1', GB: '+44', ZA: '+27', KE: '+254' };
+                    setDialCode(map[cc] || '+234');
+                  }}
+                  className="col-span-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                >
+                  <option value="NG">Nigeria (+234)</option>
+                  <option value="GH">Ghana (+233)</option>
+                  <option value="US">United States (+1)</option>
+                  <option value="GB">United Kingdom (+44)</option>
+                  <option value="ZA">South Africa (+27)</option>
+                  <option value="KE">Kenya (+254)</option>
+                </select>
+                <div className="col-span-2 relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Phone className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    required
+                    value={phoneLocal}
+                    onChange={(e) => setPhoneLocal(e.target.value)}
+                    className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                    placeholder="8012345678"
+                  />
                 </div>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  required
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="e.g. +2348012345678"
-                />
               </div>
+              <p className="mt-1 text-xs text-gray-500">We will send a verification code to {dialCode} {phoneLocal}.</p>
             </div>
           </div>
 

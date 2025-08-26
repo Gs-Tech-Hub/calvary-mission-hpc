@@ -202,27 +202,16 @@ export default function ConventionPage() {
 
       <section id="register" className="mx-auto max-w-3xl px-6 py-16" aria-labelledby="registration-heading">
         <h2 id="registration-heading" className="text-2xl font-bold text-center">Register Your Attendance</h2>
-        <p className="mt-3 text-gray-700 text-center">Help us plan seating and hospitality. Admission is free.</p>
-        <div className="mt-8">
-          <form className="grid grid-cols-1 gap-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">Full Name</label>
-              <input id="name" name="name" type="text" required className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" placeholder="Jane Doe" />
-            </div>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-              <input id="email" name="email" type="email" required className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" placeholder="you@example.com" />
-            </div>
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone</label>
-              <input id="phone" name="phone" type="tel" className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" placeholder="+234 ..." />
-            </div>
-            <div className="flex items-center justify-center">
-              <button type="submit" className="mt-4 inline-flex justify-center rounded-md bg-emerald-600 px-6 py-3 text-base font-semibold text-white shadow hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">Submit</button>
-            </div>
-          </form>
+        <p className="mt-3 text-gray-700 text-center">Registration is free and handled via your main account.</p>
+        <div className="mt-8 flex items-center justify-center">
+          <Link href="/auth/register" className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-8 py-3 text-base font-semibold text-white shadow hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            Create account & register
+          </Link>
         </div>
-        <p className="mt-6 text-center text-sm text-gray-600">By registering you agree to receive event updates by email/SMS.</p>
+        <p className="mt-4 text-center text-sm text-gray-600">
+          Already have an account?{' '}
+          <Link href="/auth/login" className="text-emerald-700 underline">Sign in</Link>
+        </p>
       </section>
 
       <section className="mx-auto max-w-6xl px-6 pb-20" aria-labelledby="faq-heading">
