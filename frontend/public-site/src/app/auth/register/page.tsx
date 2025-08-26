@@ -9,19 +9,16 @@ import { Eye, EyeOff, User, Mail, Phone, MapPin, Church, Users } from 'lucide-re
 export default function RegisterPage() {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    username: '',
+    fullName: '',
     email: '',
-    password: '',
-    confirmPassword: '',
     phone: '',
     address: '',
     isMember: false,
     churchBranch: '',
     department: '',
     isChristian: false,
-    churchAttended: '',
+    previousChurch: '',
   });
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
@@ -35,17 +32,19 @@ export default function RegisterPage() {
     }));
   };
 
+  const isValidE164Phone = (value: string) => /^\+[1-9]\d{7,14}$/.test(value);
+
   const nextStep = () => {
-    if (step === 1 && (!formData.username || !formData.email || !formData.password || !formData.confirmPassword)) {
+    if (step === 1 && (!formData.fullName || !formData.email)) {
       setError('Please fill in all required fields');
-      return;
-    }
-    if (step === 1 && formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
       return;
     }
     if (step === 2 && (!formData.phone || !formData.address)) {
       setError('Please fill in all required fields');
+      return;
+    }
+    if (step === 2 && !isValidE164Phone(formData.phone)) {
+      setError('Enter phone in E.164 format with country code, e.g. +2348012345678');
       return;
     }
     setError('');
@@ -64,16 +63,15 @@ export default function RegisterPage() {
 
     try {
       const userData = {
-        username: formData.username,
+        fullName: formData.fullName,
         email: formData.email,
-        password: formData.password,
         phone: formData.phone,
         address: formData.address,
         isMember: formData.isMember,
         churchBranch: formData.churchBranch,
         department: formData.department,
         isChristian: formData.isChristian,
-        churchAttended: formData.churchAttended,
+        previousChurch: formData.previousChurch,
       };
 
       await register(userData);
@@ -88,22 +86,22 @@ export default function RegisterPage() {
   const renderStep1 = () => (
     <div className="space-y-4">
       <div>
-        <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-          Username *
+        <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
+          Full name *
         </label>
         <div className="mt-1 relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <User className="h-5 w-5 text-gray-400" />
           </div>
           <input
-            id="username"
-            name="username"
+            id="fullName"
+            name="fullName"
             type="text"
             required
-            value={formData.username}
+            value={formData.fullName}
             onChange={handleInputChange}
             className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-            placeholder="Choose a username"
+            placeholder="Enter your full name"
           />
         </div>
       </div>
@@ -129,58 +127,7 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-          Password *
-        </label>
-        <div className="mt-1 relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Eye className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            id="password"
-            name="password"
-            type={showPassword ? 'text' : 'password'}
-            required
-            value={formData.password}
-            onChange={handleInputChange}
-            className="appearance-none relative block w-full pl-10 pr-12 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-            placeholder="Create a password"
-          />
-          <button
-            type="button"
-            className="absolute inset-y-0 right-0 pr-3 flex items-center"
-            onClick={() => setShowPassword(!showPassword)}
-          >
-            {showPassword ? (
-              <EyeOff className="h-5 w-5 text-gray-400" />
-            ) : (
-              <Eye className="h-5 w-5 text-gray-400" />
-            )}
-          </button>
-        </div>
-      </div>
-
-      <div>
-        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-          Confirm Password *
-        </label>
-        <div className="mt-1 relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Eye className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            id="confirmPassword"
-            name="confirmPassword"
-            type={showPassword ? 'text' : 'password'}
-            required
-            value={formData.confirmPassword}
-            onChange={handleInputChange}
-            className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-            placeholder="Confirm your password"
-          />
-        </div>
-      </div>
+      {/* No password: phone will be used as backend password to satisfy Strapi */}
     </div>
   );
 
@@ -319,18 +266,18 @@ export default function RegisterPage() {
 
           {formData.isChristian && (
             <div>
-              <label htmlFor="churchAttended" className="block text-sm font-medium text-gray-700">
-                Church Currently Attending
+              <label htmlFor="previousChurch" className="block text-sm font-medium text-gray-700">
+                Previous/Current Church
               </label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Church className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  id="churchAttended"
-                  name="churchAttended"
+                  id="previousChurch"
+                  name="previousChurch"
                   type="text"
-                  value={formData.churchAttended}
+                  value={formData.previousChurch}
                   onChange={handleInputChange}
                   className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                   placeholder="Enter church name"

@@ -46,3 +46,105 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: error.message }, { status: 500 })
     }
 }
+
+// Minimal phone format validator for E.164 with country code
+function isValidE164Phone(phone: string) {
+    return /^\+[1-9]\d{7,14}$/.test(phone)
+}
+
+// Registration proxy using phone-based auth; removes unsupported fields from initial Strapi call
+export async function POST(request: NextRequest) {
+    try {
+        const body = await request.json()
+        const {
+            username,
+            email,
+            phone,
+            address,
+            churchBranch,
+            department,
+            isMember,
+            isChristian,
+            churchAttended,
+        } = body
+
+        if (!username || !email || !phone) {
+            return NextResponse.json(
+                { error: 'username, email and phone are required' },
+                { status: 400 }
+            )
+        }
+
+        if (!isValidE164Phone(phone)) {
+            return NextResponse.json(
+                { error: 'Phone must include country code in E.164 format (e.g. +2348012345678)' },
+                { status: 400 }
+            )
+        }
+
+        // Use phone as password to satisfy Strapi local auth requirement
+        const registerPayload = {
+            username,
+            email,
+            password: phone,
+        }
+
+        const registerResponse = await fetch(`${STRAPI_URL}/api/auth/local/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(registerPayload),
+        })
+
+        const registerData = await registerResponse.json()
+        if (!registerResponse.ok) {
+            return NextResponse.json(
+                { error: registerData.error?.message || 'Registration failed' },
+                { status: registerResponse.status }
+            )
+        }
+
+        const jwt = registerData.jwt
+        const userId = registerData.user?.id
+
+        // Attach extra profile fields in a follow-up update
+        const profileData: any = {
+            phone,
+            address,
+            isMember: !!isMember,
+            isChristian: !!isChristian,
+        }
+
+        if (isMember) {
+            if (churchBranch) profileData.churchBranch = churchBranch
+            if (department) profileData.department = department
+        } else if (isChristian && churchAttended) {
+            profileData.churchAttended = churchAttended
+        }
+
+        if (userId && jwt) {
+            await fetch(`${STRAPI_URL}/api/users/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${jwt}`,
+                },
+                body: JSON.stringify(profileData),
+            })
+        }
+
+        return NextResponse.json(
+            {
+                user: { ...registerData.user, ...profileData },
+                jwt,
+                message: 'Registration successful',
+            },
+            { status: 201 }
+        )
+    } catch (error: any) {
+        console.error('Registration error:', error)
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        )
+    }
+}

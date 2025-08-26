@@ -15,11 +15,11 @@ export default function HomePage() {
       <Navbar />
       <Hero />
       <Countdown />
-      <StatsCounter />
+      {/* <StatsCounter /> */}
       <RecentSermons />
-      <ChurchTV />
-      <AboutUs />
-      <Testimonials />
+      {/* <ChurchTV /> */}
+      {/* <AboutUs /> */}
+      {/* <Testimonials /> */}
       <CalloutBanner />
       <Footer />
     </>

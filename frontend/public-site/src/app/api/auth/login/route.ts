@@ -2,27 +2,38 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337'
 
+function isValidE164Phone(phone: string) {
+  return /^\+[1-9]\d{7,14}$/.test(phone)
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { identifier, password } = body
+    const { phone } = body
 
-    if (!identifier || !password) {
+    if (!phone) {
       return NextResponse.json(
-        { error: 'Email/username and password are required' },
+        { error: 'Phone is required' },
         { status: 400 }
       )
     }
 
-    // Proxy login request to Strapi
+    if (!isValidE164Phone(phone)) {
+      return NextResponse.json(
+        { error: 'Phone must include country code in E.164 format (e.g. +2348012345678)' },
+        { status: 400 }
+      )
+    }
+
+    // Phone is used as both identifier and password (per registration scheme)
     const response = await fetch(`${STRAPI_URL}/api/auth/local`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        identifier,
-        password,
+        identifier: phone,
+        password: phone,
       }),
     })
 
@@ -35,7 +46,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Set authentication cookie
     const responseHeaders = new Headers()
     responseHeaders.set('Set-Cookie', `auth-token=${data.jwt}; Path=/; HttpOnly; SameSite=Strict`)
 

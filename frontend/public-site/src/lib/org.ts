@@ -1,7 +1,7 @@
 
 export const org = {
   name: "Calvary Mission HPC",
-  description: "A place of worship, community and spiritual growth ",
+  description: "A place of worship, community and spiritual growth",
   logo: "/logo.svg", 
   heroImage: "/img-1.jpg",
   address: "26 Dein Street, Agbor, Nigeria",

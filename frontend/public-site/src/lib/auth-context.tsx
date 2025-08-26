@@ -5,6 +5,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 interface User {
   id: number;
   username: string;
+  fullName?: string;
   email: string;
   phone?: string;
   address?: string;
@@ -12,13 +13,13 @@ interface User {
   department?: string;
   isMember?: boolean;
   isChristian?: boolean;
-  churchAttended?: string;
+  previousChurch?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (identifier: string, password: string) => Promise<void>;
+  login: (phone: string) => Promise<void>;
   register: (userData: any) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
@@ -47,12 +48,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const login = async (identifier: string, password: string) => {
+  const login = async (phone: string) => {
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier, password }),
+        body: JSON.stringify({ phone }),
       });
 
       if (!response.ok) {
