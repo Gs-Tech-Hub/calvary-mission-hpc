@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "entertainments",
+  "info": {
+    "singularName": "entertainment",
+    "pluralName": "entertainments",
+    "displayName": "Entertainment"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "blocks"
+    },
+    "youtubeId": {
+      "type": "text"
+    },
+    "thumbnail": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images", "files", "videos", "audios"]
+    },
+    "category": {
+      "type": "enumeration",
+      "enum": ["music", "drama", "comedy", "short-film", "other"],
+      "default": "other"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title"
+    },
+    "publishedAt": {
+      "type": "datetime"
+    }
+  }
+}
+

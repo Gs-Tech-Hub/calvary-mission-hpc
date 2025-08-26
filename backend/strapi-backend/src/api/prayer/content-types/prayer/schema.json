@@ -1,0 +1,20 @@
+{
+  "kind": "collectionType",
+  "collectionName": "prayers",
+  "info": {
+    "singularName": "prayer",
+    "pluralName": "prayers",
+    "displayName": "Prayer Request"
+  },
+  "options": { "draftAndPublish": true },
+  "pluginOptions": {},
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "email": { "type": "email" },
+    "phone": { "type": "string" },
+    "request": { "type": "text", "required": true },
+    "status": { "type": "enumeration", "enum": ["new", "in-progress", "prayed"], "default": "new" },
+    "session": { "type": "relation", "relation": "manyToOne", "target": "api::prayer-session.prayer-session" }
+  }
+}
+

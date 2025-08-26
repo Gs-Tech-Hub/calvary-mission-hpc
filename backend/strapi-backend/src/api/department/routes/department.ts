@@ -1,0 +1,11 @@
+export default {
+  routes: [
+    { method: 'GET', path: '/departments', handler: 'department.find', config: { policies: [] } },
+    { method: 'GET', path: '/departments/:id', handler: 'department.findOne', config: { policies: [] } },
+    { method: 'POST', path: '/departments', handler: 'department.create', config: { policies: [] } },
+    { method: 'PUT', path: '/departments/:id', handler: 'department.update', config: { policies: [] } },
+    { method: 'DELETE', path: '/departments/:id', handler: 'department.delete', config: { policies: [] } }
+  ]
+};
+
+

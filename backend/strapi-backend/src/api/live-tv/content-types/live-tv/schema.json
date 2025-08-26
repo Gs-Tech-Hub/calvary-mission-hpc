@@ -1,0 +1,20 @@
+{
+  "kind": "collectionType",
+  "collectionName": "live_tvs",
+  "info": {
+    "singularName": "live-tv",
+    "pluralName": "live-tvs",
+    "displayName": "Live TV"
+  },
+  "options": { "draftAndPublish": true },
+  "pluginOptions": {},
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "channelKey": { "type": "uid", "targetField": "name" },
+    "streamUrl": { "type": "text", "required": true },
+    "backupStreamUrl": { "type": "text" },
+    "thumbnail": { "type": "media", "multiple": false, "allowedTypes": ["images"] },
+    "isActive": { "type": "boolean", "default": true }
+  }
+}
+

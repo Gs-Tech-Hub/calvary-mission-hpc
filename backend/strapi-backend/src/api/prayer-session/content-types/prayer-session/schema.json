@@ -1,0 +1,18 @@
+{
+  "kind": "collectionType",
+  "collectionName": "prayer_sessions",
+  "info": {
+    "singularName": "prayer-session",
+    "pluralName": "prayer-sessions",
+    "displayName": "Prayer Session"
+  },
+  "options": { "draftAndPublish": true },
+  "pluginOptions": {},
+  "attributes": {
+    "title": { "type": "string", "required": true },
+    "scheduledAt": { "type": "datetime" },
+    "description": { "type": "blocks" },
+    "isOpen": { "type": "boolean", "default": true }
+  }
+}
+
