@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import Navbar from '@/components/navbar';
 import { org } from '@/lib/org';
 import { AuthProvider } from '@/lib/auth-context';
+import PWAInstaller from '@/components/PWAInstaller';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -43,11 +44,33 @@ export const metadata: Metadata = {
     images: [org.heroImage || '/img-1.jpg'],
   },
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
     shortcut: '/favicon.ico',
-    apple: '/favicon.ico',
+    apple: [
+      { url: '/icons/icon-152x152.png', sizes: '152x152', type: 'image/png' },
+      { url: '/icons/icon-180x180.png', sizes: '180x180', type: 'image/png' },
+    ],
   },
-  themeColor: '#ffffff',
+  themeColor: '#1f2937',
+  manifest: '/manifest.json',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: org.name,
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -65,6 +88,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main className="flex-1 overflow-x-hidden pt-0 px-0">
             {children}
           </main>
+          
+          <PWAInstaller />
         </AuthProvider>
       </body>
     </html>

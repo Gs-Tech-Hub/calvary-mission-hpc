@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Menu, X, User, LogOut } from "lucide-react";
+import { Menu, X, User, LogOut, Download } from "lucide-react";
 import { org } from "@/lib/org";
 import { useAuth } from "@/lib/auth-context";
 
@@ -21,6 +21,8 @@ export default function Navbar() {
   const [logoUrl, setLogoUrl] = useState(org.logo);
   const [logoError, setLogoError] = useState(false);
   const [isApiLogo, setIsApiLogo] = useState(false);
+  const [showPWAInstall, setShowPWAInstall] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
@@ -38,7 +40,7 @@ export default function Navbar() {
     async function fetchOrg() {
       try {
         const res = await fetch('/api/strapi?endpoint=orgs&populate=*');
-        if (!res.ok) throw new Error("Failed to fetch org");
+        if (!res.ok) throw Error("Failed to fetch org");
         const data = await res.json();
         console.log(data.data[0].name);
         setOrgName(data.data[0].name || org.name);
@@ -58,6 +60,44 @@ export default function Navbar() {
     }
     fetchOrg();
   }, []);
+
+  // PWA Install functionality
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowPWAInstall(true);
+    };
+
+    const handleAppInstalled = () => {
+      setShowPWAInstall(false);
+      setDeferredPrompt(null);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handlePWAInstall = async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt');
+    } else {
+      console.log('User dismissed the install prompt');
+    }
+
+    setDeferredPrompt(null);
+    setShowPWAInstall(false);
+  };
 
 
 
@@ -110,6 +150,18 @@ export default function Navbar() {
 
         {/* Authentication Buttons */}
         <div className="hidden md:flex items-center space-x-4">
+          {/* PWA Install Button */}
+          {showPWAInstall && (
+            <button
+              onClick={handlePWAInstall}
+              className="flex items-center space-x-2 px-3 py-2 text-white hover:text-yellow-400 transition-colors border border-yellow-400 rounded-md"
+              title="Install App"
+            >
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">Install</span>
+            </button>
+          )}
+          
           {user ? (
             <>
               <Link
@@ -158,6 +210,22 @@ export default function Navbar() {
               </Link>
             </li>
           ))}
+          
+          {/* Mobile PWA Install */}
+          {showPWAInstall && (
+            <li className="pt-4 border-t border-gray-600">
+              <button
+                onClick={() => {
+                  handlePWAInstall();
+                  setMobileMenuOpen(false);
+                }}
+                className="flex items-center space-x-2 text-white hover:text-yellow-400 transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                <span>Install App</span>
+              </button>
+            </li>
+          )}
           
           {/* Mobile Authentication */}
           <li className="pt-4 border-t border-gray-600">
