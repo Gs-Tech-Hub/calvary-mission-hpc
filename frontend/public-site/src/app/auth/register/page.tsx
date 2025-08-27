@@ -80,6 +80,7 @@ export default function RegisterPage() {
         department: formData.department,
         isChristian: formData.isChristian,
         previousChurch: formData.previousChurch,
+        internalizedPhone: toE164(formData.phone)
       };
 
       await register(userData);
