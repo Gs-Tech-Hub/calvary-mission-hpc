@@ -126,10 +126,10 @@ export async function POST(request: NextRequest) {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${jwt}`,
           },
-          body: JSON.stringify({ internalizedPhone: cleanPhone })
+          body: JSON.stringify({ phone: cleanPhone })
         });
       } catch (err) {
-        console.warn('Failed to update user internalizedPhone:', err);
+        console.warn('Failed to update user phone:', err);
       }
     }
 
