@@ -2,9 +2,6 @@ import type { NextConfig } from "next";
 import withPWA from 'next-pwa';
 
 const nextConfig: NextConfig = withPWA({
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   images: {
     remotePatterns: [
       {
@@ -158,6 +155,12 @@ const nextConfig: NextConfig = withPWA({
       },
     ],
   },
+
 });
 
-export default nextConfig;
+export default {
+  ...nextConfig,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+};
