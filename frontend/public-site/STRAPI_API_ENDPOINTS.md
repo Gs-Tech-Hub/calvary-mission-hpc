@@ -217,7 +217,7 @@ Tip: If using an external payment gateway, handle payment off-platform and POST 
 ### Onboarding / Registration
 Content type: `api::onboarding.onboarding`
 
-- POST `/api/onboardings` — Submit onboarding form (public-allowed)
+**Step 1:** `POST /api/onboardings` — Submit onboarding form (public-allowed)
   - Body:
     ```json
     {
@@ -237,7 +237,33 @@ Content type: `api::onboarding.onboarding`
     }
     ```
 
-- GET `/api/onboardings` — List submissions (restricted)
+**Step 2:** If `isMember` is true, update the member record:
+  - `PUT /api/members/:id` — Update member profile with onboarding data.
+  - Example body:
+    ```json
+    {
+      "data": {
+        "name": "John Doe",
+        "email": "john@example.com",
+        "phone": "+1...",
+        "address": "...",
+        "member_status": "Active",
+        "department": <department-id>,
+        "joinDate": "2025-08-27"
+      }
+    }
+    ```
+
+**Step 3:** Update user profile with additional fields (e.g., `internalizedPhone`):
+  - `PUT /api/users/:id` — Add or update `internalizedPhone` in user schema.
+  - Example body:
+    ```json
+    {
+      "internalizedPhone": "+1..."
+    }
+    ```
+
+-- GET `/api/onboardings` — List submissions (restricted)
 
 Fields: `fullName`, `email`, `phone`, `address`, `isMember`, `churchBranch`, `department` (relation), `isChristian`, `previousChurch`, `notes`, `followUpNeeded`.
 

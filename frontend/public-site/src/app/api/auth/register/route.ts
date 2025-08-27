@@ -36,7 +36,6 @@ export async function POST(request: NextRequest) {
 
     // Register with Strapi using phone as password to satisfy local auth requirements
     console.log('Attempting Strapi registration:', { username: fullName, email, phone: phone.substring(0, 8) + '...' })
-    
     const registerResponse = await fetch(`${STRAPI_URL}/api/auth/local/register`, {
       method: 'POST',
       headers: {
@@ -51,12 +50,6 @@ export async function POST(request: NextRequest) {
 
     if (!registerResponse.ok) {
       console.error('Strapi registration failed:', registerData)
-      console.error('Full error response:', {
-        status: registerResponse.status,
-        statusText: registerResponse.statusText,
-        headers: Object.fromEntries(registerResponse.headers.entries()),
-        body: registerData
-      })
       return NextResponse.json(
         { error: registerData.error?.message || `Registration failed: ${registerResponse.status} ${registerResponse.statusText}` },
         { status: registerResponse.status }
@@ -66,42 +59,86 @@ export async function POST(request: NextRequest) {
     const jwt = registerData.jwt
     const userId = registerData.user?.id
 
-    // Store additional profile data in the user's profile
-    if (userId && jwt) {
-      const profileData: any = {
-        phone: cleanPhone,
-        address,
-        isMember: !!isMember,
-        isChristian: !!isChristian,
-        previousChurch: previousChurch || null,
-      }
-      
-      if (isMember) {
-        if (churchBranch) profileData.churchBranch = churchBranch
-        if (department) profileData.department = department
-      }
-
-      // Update user profile with additional data
-      const profileRes = await fetch(`${STRAPI_URL}/api/users/${userId}`, {
-        method: 'PUT',
+    // Step 1: Submit onboarding
+    let onboardingId = null;
+    try {
+      const onboardingRes = await fetch(`${STRAPI_URL}/api/onboardings`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${jwt}`,
         },
-        body: JSON.stringify(profileData),
-      })
-      
-      if (!profileRes.ok) {
-        console.warn('Failed to update user profile, but registration succeeded:', await profileRes.text())
+        body: JSON.stringify({
+          data: {
+            fullName,
+            email,
+            phone: cleanPhone,
+            address,
+            isMember,
+            churchBranch,
+            department,
+            isChristian,
+            previousChurch,
+            notes: '',
+            followUpNeeded: true
+          }
+        })
+      });
+      const onboardingData = await onboardingRes.json();
+      onboardingId = onboardingData?.data?.id || null;
+    } catch (err) {
+      console.warn('Onboarding submission failed:', err);
+    }
+
+    // Step 2: If member, update member record
+    if (isMember && userId && jwt) {
+      try {
+        await fetch(`${STRAPI_URL}/api/members/${userId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${jwt}`,
+          },
+          body: JSON.stringify({
+            data: {
+              name: fullName,
+              email,
+              phone: cleanPhone,
+              address,
+              member_status: 'Active',
+              department,
+              joinDate: new Date().toISOString().slice(0, 10),
+              churchBranch
+            }
+          })
+        });
+      } catch (err) {
+        console.warn('Member update failed:', err);
       }
     }
 
-    const response = NextResponse.json(
-      { 
-        user: { 
-          ...registerData.user, 
-          fullName, 
-          email, 
+    // Step 3: Update user profile with internalizedPhone
+    if (userId && jwt) {
+      try {
+        await fetch(`${STRAPI_URL}/api/users/${userId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${jwt}`,
+          },
+          body: JSON.stringify({ internalizedPhone: cleanPhone })
+        });
+      } catch (err) {
+        console.warn('Failed to update user internalizedPhone:', err);
+      }
+    }
+
+    return NextResponse.json(
+      {
+        user: {
+          ...registerData.user,
+          fullName,
+          email,
           phone: cleanPhone,
           address,
           isMember: !!isMember,
@@ -109,12 +146,13 @@ export async function POST(request: NextRequest) {
           previousChurch: previousChurch || null,
           churchBranch: churchBranch || null,
           department: department || null,
+          onboardingId
         },
         jwt,
-        message: 'Registration successful' 
+        message: 'Registration successful'
       },
       { status: 201 }
-    )
+    );
   } catch (error: any) {
     console.error('Registration error:', error)
     return NextResponse.json(
