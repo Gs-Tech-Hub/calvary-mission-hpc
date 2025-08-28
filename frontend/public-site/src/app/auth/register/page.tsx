@@ -8,6 +8,7 @@ import { Eye, EyeOff, User, Mail, Phone, MapPin, Church, Users } from 'lucide-re
 
 export default function RegisterPage() {
   const [step, setStep] = useState(1);
+  const [regResult, setRegResult] = useState<{ user: any; jwt: string } | null>(null);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -56,7 +57,46 @@ export default function RegisterPage() {
       return;
     }
     setError('');
-    setStep(step + 1);
+    // When moving from step 2 to 3, register the user
+    if (step === 2) {
+      (async () => {
+        setLoading(true);
+        try {
+          const normalizedPhone = toE164(formData.phone);
+          if (!normalizedPhone) {
+            setError('Phone number is required');
+            setLoading(false);
+            return;
+          }
+          const regData = {
+            fullName: formData.fullName,
+            email: formData.email,
+            phone: normalizedPhone,
+            address: formData.address,
+            isMember: formData.isMember,
+          };
+          const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(regData),
+          });
+          const data = await response.json();
+          if (!response.ok) {
+            setError(data.error || 'Registration failed');
+            setLoading(false);
+            return;
+          }
+          setRegResult({ user: data.user, jwt: data.jwt });
+          setStep(step + 1);
+        } catch (err: any) {
+          setError(err.message || 'Registration failed');
+        } finally {
+          setLoading(false);
+        }
+      })();
+    } else {
+      setStep(step + 1);
+    }
   };
 
   const prevStep = () => {
@@ -70,56 +110,50 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      // Always send phone in E.164 format to backend
-      const normalizedPhone = toE164(formData.phone);
-      if (!normalizedPhone) {
-        setError('Phone number is required');
-        setLoading(false);
+      if (!regResult) {
+        setError('User registration not completed.');
         return;
       }
-      // 1. Register user with only fullName, email, and phone
-      const regData = {
-        fullName: formData.fullName,
-        email: formData.email,
-        phone: normalizedPhone,
-        address: formData.address,
-        isMember: formData.isMember,
-      };
-      const response = await fetch('/api/auth/register', {
+      setLoading(true);
+      // 2. After registration, update membership or onboarding endpoint
+      let endpoint = '';
+      let payload: any = {};
+      if (formData.isMember) {
+        endpoint = '/api/membership';
+        payload = {
+          userId: regResult.user?.id,
+          ...formData,
+        };
+      } else {
+        endpoint = '/api/onboarding';
+        payload = {
+          userId: regResult.user?.id,
+          ...formData,
+        };
+      }
+      const updateRes = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(regData),
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': regResult.jwt ? `Bearer ${regResult.jwt}` : '',
+        },
+        body: JSON.stringify(payload),
       });
-      const data = await response.json();
-      if (!response.ok) {
-        setError(data.error || 'Registration failed');
+      const updateJson = await updateRes.json();
+      if (!updateRes.ok) {
+        setError(updateJson.error || 'Onboarding/Membership update failed');
         setLoading(false);
         return;
       }
 
-      // 2. Send the rest of the data to a profile endpoint, passing userId and jwt in headers
-      const profileData = {
-        churchBranch: formData.churchBranch,
-        department: formData.department,
-        isChristian: formData.isChristian,
-        previousChurch: formData.previousChurch,
-        countryCode,
-        dialCode
-      };
-      const profileRes = await fetch('/api/auth/profile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': data?.user?.id ? String(data.user.id) : '',
-          'authorization': data?.jwt ? `Bearer ${data.jwt}` : '',
-        },
-        body: JSON.stringify(profileData),
-      });
-      const profileJson = await profileRes.json();
-      if (!profileRes.ok) {
-        setError(profileJson.error || 'Profile setup failed');
-        setLoading(false);
-        return;
+      // Optionally connect user (e.g., login or set context)
+      if (register && typeof register === 'function') {
+        await register({
+          email: formData.email,
+          phone: formData.phone,
+          jwt: regResult.jwt,
+          user: regResult.user,
+        });
       }
 
       router.push('/dashboard');
@@ -401,7 +435,8 @@ export default function RegisterPage() {
           {step === 3 && renderStep3()}
 
           <div className="flex space-x-3">
-            {step > 1 && (
+            {/* Hide Previous button after step 2 is successful (on step 3) */}
+            {step > 1 && step < 3 && (
               <button
                 type="button"
                 onClick={prevStep}
@@ -410,7 +445,7 @@ export default function RegisterPage() {
                 Previous
               </button>
             )}
-            
+
             {step < 3 ? (
               <button
                 type="button"
