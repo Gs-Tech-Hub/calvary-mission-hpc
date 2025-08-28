@@ -24,7 +24,7 @@ export default function RegisterPage() {
   const [dialCode, setDialCode] = useState('+234');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { register, setUser } = useAuth();
   const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -57,8 +57,13 @@ export default function RegisterPage() {
       return;
     }
     setError('');
-    // When moving from step 2 to 3, register the user
+    // When moving from step 2 to 3, register the user only if not already registered
     if (step === 2) {
+      if (regResult) {
+        // Already registered, just go to next step
+        setStep(step + 1);
+        return;
+      }
       (async () => {
         setLoading(true);
         try {
@@ -112,48 +117,66 @@ export default function RegisterPage() {
     try {
       if (!regResult) {
         setError('User registration not completed.');
-        return;
-      }
-      setLoading(true);
-      // 2. After registration, update membership or onboarding endpoint
-      let endpoint = '';
-      let payload: any = {};
-      if (formData.isMember) {
-        endpoint = '/api/membership';
-        payload = {
-          userId: regResult.user?.id,
-          ...formData,
-        };
-      } else {
-        endpoint = '/api/onboarding';
-        payload = {
-          userId: regResult.user?.id,
-          ...formData,
-        };
-      }
-      const updateRes = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'authorization': regResult.jwt ? `Bearer ${regResult.jwt}` : '',
-        },
-        body: JSON.stringify(payload),
-      });
-      const updateJson = await updateRes.json();
-      if (!updateRes.ok) {
-        setError(updateJson.error || 'Onboarding/Membership update failed');
         setLoading(false);
         return;
       }
 
-      // Optionally connect user (e.g., login or set context)
-      if (register && typeof register === 'function') {
-        await register({
-          email: formData.email,
-          phone: formData.phone,
-          jwt: regResult.jwt,
-          user: regResult.user,
+      if (formData.isMember) {
+        // Prepare member payload according to schema
+        const memberPayload = {
+          id: regResult.user?.id, // user permission id
+          joinDate: null, // You can add join date if you collect it
+          member_status: 'active',
+          department: formData.department || '',
+          birthDate: null, // You can add birth date if you collect it
+          maritalStatus: 'Single', // You can collect this from the form if needed
+          church_branch: formData.churchBranch || '',
+        };
+        const memberRes = await fetch('/api/members', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'authorization': regResult.jwt ? `Bearer ${regResult.jwt}` : '',
+          },
+          body: JSON.stringify(memberPayload),
         });
+        const memberJson = await memberRes.json();
+        if (!memberRes.ok) {
+          setError(memberJson.error || 'Member step failed');
+          setLoading(false);
+          return;
+        }
+      } else {
+        // Prepare onboarding payload according to schema
+        const onboardingPayload = {
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: toE164(formData.phone),
+          address: formData.address,
+          isChristian: formData.isChristian,
+          previousChurch: formData.previousChurch || null,
+          notes: null,
+          followUpNeeded: true
+        };
+        const onboardingRes = await fetch('/api/onboardings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'authorization': regResult.jwt ? `Bearer ${regResult.jwt}` : '',
+          },
+          body: JSON.stringify(onboardingPayload),
+        });
+        const onboardingJson = await onboardingRes.json();
+        if (!onboardingRes.ok) {
+          setError(onboardingJson.error || 'Onboarding step failed');
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Set user context directly after registration steps
+      if (setUser && typeof setUser === 'function') {
+        setUser({ ...regResult.user, jwt: regResult.jwt });
       }
 
       router.push('/dashboard');
