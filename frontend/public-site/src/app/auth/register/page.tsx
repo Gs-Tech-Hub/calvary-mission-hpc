@@ -8,6 +8,7 @@ import { Eye, EyeOff, User, Mail, Phone, MapPin, Church, Users } from 'lucide-re
 
 export default function RegisterPage() {
   const [step, setStep] = useState(1);
+  const [regResult, setRegResult] = useState<{ user: any; jwt: string } | null>(null);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -23,7 +24,7 @@ export default function RegisterPage() {
   const [dialCode, setDialCode] = useState('+234');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { register, setUser } = useAuth();
   const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -56,7 +57,51 @@ export default function RegisterPage() {
       return;
     }
     setError('');
-    setStep(step + 1);
+    // When moving from step 2 to 3, register the user only if not already registered
+    if (step === 2) {
+      if (regResult) {
+        // Already registered, just go to next step
+        setStep(step + 1);
+        return;
+      }
+      (async () => {
+        setLoading(true);
+        try {
+          const normalizedPhone = toE164(formData.phone);
+          if (!normalizedPhone) {
+            setError('Phone number is required');
+            setLoading(false);
+            return;
+          }
+          const regData = {
+            fullName: formData.fullName,
+            email: formData.email,
+            phone: normalizedPhone,
+            address: formData.address,
+            isMember: formData.isMember,
+          };
+          const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(regData),
+          });
+          const data = await response.json();
+          if (!response.ok) {
+            setError(data.error || 'Registration failed');
+            setLoading(false);
+            return;
+          }
+          setRegResult({ user: data.user, jwt: data.jwt });
+          setStep(step + 1);
+        } catch (err: any) {
+          setError(err.message || 'Registration failed');
+        } finally {
+          setLoading(false);
+        }
+      })();
+    } else {
+      setStep(step + 1);
+    }
   };
 
   const prevStep = () => {
@@ -70,20 +115,70 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const userData = {
-        fullName: formData.fullName,
-        email: formData.email,
-        phone: toE164(formData.phone),
-        address: formData.address,
-        isMember: formData.isMember,
-        churchBranch: formData.churchBranch,
-        department: formData.department,
-        isChristian: formData.isChristian,
-        previousChurch: formData.previousChurch,
-        internalizedPhone: toE164(formData.phone)
-      };
+      if (!regResult) {
+        setError('User registration not completed.');
+        setLoading(false);
+        return;
+      }
 
-      await register(userData);
+      if (formData.isMember) {
+        // Prepare member payload according to schema
+        const memberPayload = {
+          id: regResult.user?.id, // user permission id
+          joinDate: null, // You can add join date if you collect it
+          member_status: 'active',
+          department: formData.department || '',
+          birthDate: null, // You can add birth date if you collect it
+          maritalStatus: 'Single', // You can collect this from the form if needed
+          church_branch: formData.churchBranch || '',
+        };
+        const memberRes = await fetch('/api/members', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'authorization': regResult.jwt ? `Bearer ${regResult.jwt}` : '',
+          },
+          body: JSON.stringify(memberPayload),
+        });
+        const memberJson = await memberRes.json();
+        if (!memberRes.ok) {
+          setError(memberJson.error || 'Member step failed');
+          setLoading(false);
+          return;
+        }
+      } else {
+        // Prepare onboarding payload according to schema
+        const onboardingPayload = {
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: toE164(formData.phone),
+          address: formData.address,
+          isChristian: formData.isChristian,
+          previousChurch: formData.previousChurch || null,
+          notes: null,
+          followUpNeeded: true
+        };
+        const onboardingRes = await fetch('/api/onboardings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'authorization': regResult.jwt ? `Bearer ${regResult.jwt}` : '',
+          },
+          body: JSON.stringify(onboardingPayload),
+        });
+        const onboardingJson = await onboardingRes.json();
+        if (!onboardingRes.ok) {
+          setError(onboardingJson.error || 'Onboarding step failed');
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Set user context directly after registration steps
+      if (setUser && typeof setUser === 'function') {
+        setUser({ ...regResult.user, jwt: regResult.jwt });
+      }
+
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Registration failed');
@@ -241,11 +336,11 @@ export default function RegisterPage() {
                 className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
               >
                 <option value="">Select church branch</option>
-                <option value="main">Main Branch</option>
-                <option value="north">North Branch</option>
-                <option value="south">South Branch</option>
-                <option value="east">East Branch</option>
-                <option value="west">West Branch</option>
+                <option value="main">Head Quarter</option>
+                <option value="north">Mariere Branch</option>
+                <option value="south">Alihame Branch</option>
+                <option value="east">Umunede Branch</option>
+                <option value="west">Other Branches</option>
               </select>
             </div>
           </div>
@@ -363,7 +458,8 @@ export default function RegisterPage() {
           {step === 3 && renderStep3()}
 
           <div className="flex space-x-3">
-            {step > 1 && (
+            {/* Hide Previous button after step 2 is successful (on step 3) */}
+            {step > 1 && step < 3 && (
               <button
                 type="button"
                 onClick={prevStep}
@@ -372,7 +468,7 @@ export default function RegisterPage() {
                 Previous
               </button>
             )}
-            
+
             {step < 3 ? (
               <button
                 type="button"
