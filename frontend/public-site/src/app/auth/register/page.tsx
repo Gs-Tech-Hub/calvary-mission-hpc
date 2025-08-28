@@ -70,20 +70,58 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const userData = {
+      // Always send phone in E.164 format to backend
+      const normalizedPhone = toE164(formData.phone);
+      if (!normalizedPhone) {
+        setError('Phone number is required');
+        setLoading(false);
+        return;
+      }
+      // 1. Register user with only fullName, email, and phone
+      const regData = {
         fullName: formData.fullName,
         email: formData.email,
-        phone: toE164(formData.phone),
+        phone: normalizedPhone,
         address: formData.address,
         isMember: formData.isMember,
+      };
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(regData),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error || 'Registration failed');
+        setLoading(false);
+        return;
+      }
+
+      // 2. Send the rest of the data to a profile endpoint, passing userId and jwt in headers
+      const profileData = {
         churchBranch: formData.churchBranch,
         department: formData.department,
         isChristian: formData.isChristian,
         previousChurch: formData.previousChurch,
-        internalizedPhone: toE164(formData.phone)
+        countryCode,
+        dialCode
       };
+      const profileRes = await fetch('/api/auth/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': data?.user?.id ? String(data.user.id) : '',
+          'authorization': data?.jwt ? `Bearer ${data.jwt}` : '',
+        },
+        body: JSON.stringify(profileData),
+      });
+      const profileJson = await profileRes.json();
+      if (!profileRes.ok) {
+        setError(profileJson.error || 'Profile setup failed');
+        setLoading(false);
+        return;
+      }
 
-      await register(userData);
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Registration failed');
@@ -241,11 +279,11 @@ export default function RegisterPage() {
                 className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
               >
                 <option value="">Select church branch</option>
-                <option value="main">Main Branch</option>
-                <option value="north">North Branch</option>
-                <option value="south">South Branch</option>
-                <option value="east">East Branch</option>
-                <option value="west">West Branch</option>
+                <option value="main">Head Quarter</option>
+                <option value="north">Mariere Branch</option>
+                <option value="south">Alihame Branch</option>
+                <option value="east">Umunede Branch</option>
+                <option value="west">Other Branches</option>
               </select>
             </div>
           </div>
