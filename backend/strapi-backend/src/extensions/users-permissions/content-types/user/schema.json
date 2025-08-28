@@ -68,10 +68,14 @@
     },
     "phone": {
       "type": "string",
-    "required": true,
-    "regex": "^\\+?[1-9]\\d{1,14}$",
-    "configurable": false,
-    "description": "Phone number must be in valid international format (E.164, e.g. +1234567890)"
+      "required": false,
+      "regex": "^\\+?[1-9]\\d{1,14}$"
+    },
+    "address": {
+      "type": "string"
+    },
+    "member": {
+      "type": "boolean"
     }
   }
 }

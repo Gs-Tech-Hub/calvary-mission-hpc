@@ -689,13 +689,12 @@ export interface ApiMemberMember extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
-    address: Schema.Attribute.String;
     birthDate: Schema.Attribute.Date;
+    church_branch: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     department: Schema.Attribute.String;
-    email: Schema.Attribute.Email & Schema.Attribute.Required;
     joinDate: Schema.Attribute.Date;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -703,18 +702,16 @@ export interface ApiMemberMember extends Struct.CollectionTypeSchema {
       'api::member.member'
     > &
       Schema.Attribute.Private;
-    maritalStatus: Schema.Attribute.Enumeration<
-      ['Single', 'Married', 'Widowed']
-    >;
-    member_status: Schema.Attribute.Enumeration<
-      ['Active', 'Inactive', 'Visitor']
-    >;
-    name: Schema.Attribute.String & Schema.Attribute.Required;
-    phone: Schema.Attribute.String;
+    maritalStatus: Schema.Attribute.String;
+    member_status: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    users_permissions_user: Schema.Attribute.Relation<
+      'oneToOne',
+      'plugin::users-permissions.user'
+    >;
   };
 }
 
@@ -761,20 +758,14 @@ export interface ApiOnboardingOnboarding extends Struct.CollectionTypeSchema {
   };
   attributes: {
     address: Schema.Attribute.String;
-    churchBranch: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    department: Schema.Attribute.Relation<
-      'manyToOne',
-      'api::department.department'
-    >;
     email: Schema.Attribute.Email;
     followUpNeeded: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
     fullName: Schema.Attribute.String & Schema.Attribute.Required;
     isChristian: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
-    isMember: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -1450,6 +1441,7 @@ export interface PluginUsersPermissionsUser
     draftAndPublish: false;
   };
   attributes: {
+    address: Schema.Attribute.String;
     blocked: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     confirmationToken: Schema.Attribute.String & Schema.Attribute.Private;
     confirmed: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
@@ -1467,12 +1459,13 @@ export interface PluginUsersPermissionsUser
       'plugin::users-permissions.user'
     > &
       Schema.Attribute.Private;
+    member: Schema.Attribute.Boolean;
     password: Schema.Attribute.Password &
       Schema.Attribute.Private &
       Schema.Attribute.SetMinMaxLength<{
         minLength: 6;
       }>;
-    phone: Schema.Attribute.String & Schema.Attribute.Required;
+    phone: Schema.Attribute.String;
     provider: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     resetPasswordToken: Schema.Attribute.String & Schema.Attribute.Private;

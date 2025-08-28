@@ -11,30 +11,11 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "name": {
-      "type": "string",
-      "required": true
-    },
-    "email": {
-      "type": "email",
-      "required": true
-    },
-    "phone": {
-      "type": "string"
-    },
-    "address": {
-      "type": "string"
-    },
     "joinDate": {
       "type": "date"
     },
     "member_status": {
-      "type": "enumeration",
-      "enum": [
-        "Active",
-        "Inactive",
-        "Visitor"
-      ]
+      "type": "string"
     },
     "department": {
       "type": "string"
@@ -43,12 +24,15 @@
       "type": "date"
     },
     "maritalStatus": {
-      "type": "enumeration",
-      "enum": [
-        "Single",
-        "Married",
-        "Widowed"
-      ]
+      "type": "string"
+    },
+    "church_branch": {
+      "type": "string"
+    },
+    "users_permissions_user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
     }
   }
 }
