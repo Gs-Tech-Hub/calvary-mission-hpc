@@ -33,6 +33,7 @@
     "password": {
       "type": "password",
       "minLength": 6,
+      "required": true,
       "configurable": false,
       "private": true,
       "searchable": false
@@ -68,10 +69,15 @@
     },
     "phone": {
       "type": "string",
-    "required": true,
-    "regex": "^\\+?[1-9]\\d{1,14}$",
-    "configurable": false,
-    "description": "Phone number must be in valid international format (E.164, e.g. +1234567890)"
+      "unique": true,
+      "required": true,
+      "regex": "^\\+?[1-9]\\d{1,14}$"
+    },
+    "address": {
+      "type": "string"
+    },
+    "member": {
+      "type": "boolean"
     }
   }
 }
