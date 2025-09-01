@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        identifier: phone,
+        phone: phone,
         password: phone,
       }),
     })
