@@ -1,0 +1,20 @@
+{
+  "collectionName": "components_shared_login_requests",
+  "info": {
+    "displayName": "Login Request",
+    "description": "Structure for login request data"
+  },
+  "options": {},
+  "attributes": {
+    "phone": {
+      "type": "string",
+      "required": true,
+      "regex": "^\\+?[1-9]\\d{1,14}$"
+    },
+    "password": {
+      "type": "password",
+      "required": true,
+      "minLength": 6
+    }
+  }
+}

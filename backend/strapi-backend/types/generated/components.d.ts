@@ -37,12 +37,44 @@ export interface OrgSocials extends Struct.ComponentSchema {
   };
 }
 
+export interface SharedLoginRequest extends Struct.ComponentSchema {
+  collectionName: 'components_shared_login_requests';
+  info: {
+    description: 'Structure for login request data';
+    displayName: 'Login Request';
+  };
+  attributes: {
+    password: Schema.Attribute.Password &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        minLength: 6;
+      }>;
+    phone: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
+export interface SharedLoginResponse extends Struct.ComponentSchema {
+  collectionName: 'components_shared_login_responses';
+  info: {
+    description: 'Structure for login response data';
+    displayName: 'Login Response';
+  };
+  attributes: {
+    jwt: Schema.Attribute.String;
+    message: Schema.Attribute.String;
+    success: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    user: Schema.Attribute.JSON;
+  };
+}
+
 declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
       'about-us.feature': AboutUsFeature;
       'org.hero-text': OrgHeroText;
       'org.socials': OrgSocials;
+      'shared.login-request': SharedLoginRequest;
+      'shared.login-response': SharedLoginResponse;
     }
   }
 }

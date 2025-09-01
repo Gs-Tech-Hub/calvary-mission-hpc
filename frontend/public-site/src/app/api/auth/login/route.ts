@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Phone is used as both identifier and password (per registration scheme)
-    const response = await fetch(`${STRAPI_URL}/api/auth/local`, {
+    const response = await fetch(`${STRAPI_URL}/api/phone-login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

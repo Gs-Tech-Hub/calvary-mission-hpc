@@ -847,6 +847,36 @@ export interface ApiPersistentStreamPersistentStream
   };
 }
 
+export interface ApiPhoneLoginPhoneLogin extends Struct.SingleTypeSchema {
+  collectionName: 'phone_logins';
+  info: {
+    description: 'Custom phone login endpoint for alternative authentication';
+    displayName: 'Phone Login';
+    pluralName: 'phone-logins';
+    singularName: 'phone-login';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::phone-login.phone-login'
+    > &
+      Schema.Attribute.Private;
+    loginRequest: Schema.Attribute.Component<'shared.login-request', false>;
+    loginResponse: Schema.Attribute.Component<'shared.login-response', false>;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiPrayerSessionPrayerSession
   extends Struct.CollectionTypeSchema {
   collectionName: 'prayer_sessions';
@@ -1461,11 +1491,14 @@ export interface PluginUsersPermissionsUser
       Schema.Attribute.Private;
     member: Schema.Attribute.Boolean;
     password: Schema.Attribute.Password &
+      Schema.Attribute.Required &
       Schema.Attribute.Private &
       Schema.Attribute.SetMinMaxLength<{
         minLength: 6;
       }>;
-    phone: Schema.Attribute.String;
+    phone: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
     provider: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     resetPasswordToken: Schema.Attribute.String & Schema.Attribute.Private;
@@ -1509,6 +1542,7 @@ declare module '@strapi/strapi' {
       'api::onboarding.onboarding': ApiOnboardingOnboarding;
       'api::org.org': ApiOrgOrg;
       'api::persistent-stream.persistent-stream': ApiPersistentStreamPersistentStream;
+      'api::phone-login.phone-login': ApiPhoneLoginPhoneLogin;
       'api::prayer-session.prayer-session': ApiPrayerSessionPrayerSession;
       'api::prayer.prayer': ApiPrayerPrayer;
       'api::sermon.sermon': ApiSermonSermon;

@@ -1,0 +1,23 @@
+{
+  "kind": "singleType",
+  "collectionName": "phone_logins",
+  "info": {
+    "singularName": "phone-login",
+    "pluralName": "phone-logins",
+    "displayName": "Phone Login",
+    "description": "Custom phone login endpoint for alternative authentication"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "loginRequest": {
+      "type": "component",
+      "component": "shared.login-request"
+    },
+    "loginResponse": {
+      "type": "component",
+      "component": "shared.login-response"
+    }
+  }
+}

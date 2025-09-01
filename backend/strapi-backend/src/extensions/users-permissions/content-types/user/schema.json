@@ -33,6 +33,7 @@
     "password": {
       "type": "password",
       "minLength": 6,
+      "required": true,
       "configurable": false,
       "private": true,
       "searchable": false
@@ -68,7 +69,8 @@
     },
     "phone": {
       "type": "string",
-      "required": false,
+      "unique": true,
+      "required": true,
       "regex": "^\\+?[1-9]\\d{1,14}$"
     },
     "address": {

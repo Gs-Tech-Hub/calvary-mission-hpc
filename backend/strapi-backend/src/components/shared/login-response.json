@@ -1,0 +1,23 @@
+{
+  "collectionName": "components_shared_login_responses",
+  "info": {
+    "displayName": "Login Response",
+    "description": "Structure for login response data"
+  },
+  "options": {},
+  "attributes": {
+    "success": {
+      "type": "boolean",
+      "default": false
+    },
+    "message": {
+      "type": "string"
+    },
+    "jwt": {
+      "type": "string"
+    },
+    "user": {
+      "type": "json"
+    }
+  }
+}
