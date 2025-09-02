@@ -3,73 +3,46 @@
 import { useAuth } from '@/lib/auth-context';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import DashboardNav from '@/components/dashboard/DashboardNav';
-import { Play, Music, Video, Calendar, Clock } from 'lucide-react';
+import { Play, Calendar, Clock } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-const entertainmentContent = [
-  {
-    id: 1,
-    title: 'Gospel Music Collection',
-    type: 'Music',
-    duration: '45 min',
-    category: 'Worship',
-    thumbnail: '/api/placeholder/300/200',
-    description: 'A curated collection of uplifting gospel music for spiritual growth.',
-    date: '2024-01-15',
-  },
-  {
-    id: 2,
-    title: 'Christian Comedy Show',
-    type: 'Video',
-    duration: '30 min',
-    category: 'Entertainment',
-    thumbnail: '/api/placeholder/300/200',
-    description: 'Family-friendly comedy with Christian values and positive messages.',
-    date: '2024-01-14',
-  },
-  {
-    id: 3,
-    title: 'Youth Dance Performance',
-    type: 'Video',
-    duration: '15 min',
-    category: 'Performance',
-    thumbnail: '/api/placeholder/300/200',
-    description: 'Inspiring dance performance by our youth ministry.',
-    date: '2024-01-13',
-  },
-  {
-    id: 4,
-    title: 'Instrumental Worship',
-    type: 'Music',
-    duration: '60 min',
-    category: 'Worship',
-    thumbnail: '/api/placeholder/300/200',
-    description: 'Peaceful instrumental music for prayer and meditation.',
-    date: '2024-01-12',
-  },
-  {
-    id: 5,
-    title: 'Children\'s Story Time',
-    type: 'Video',
-    duration: '20 min',
-    category: 'Education',
-    thumbnail: '/api/placeholder/300/200',
-    description: 'Biblical stories told in an engaging way for children.',
-    date: '2024-01-11',
-  },
-  {
-    id: 6,
-    title: 'Praise Team Practice',
-    type: 'Music',
-    duration: '90 min',
-    category: 'Worship',
-    thumbnail: '/api/placeholder/300/200',
-    description: 'Behind-the-scenes look at our praise team preparing for service.',
-    date: '2024-01-10',
-  },
-];
+type Entertainment = {
+  id: number;
+  title: string;
+  category?: string;
+  publishedAt?: string;
+  duration?: string;
+};
 
 export default function EntertainmentPage() {
   const { user } = useAuth();
+  const [items, setItems] = useState<Entertainment[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      try {
+        const res = await fetch('/api/strapi?endpoint=entertainments&sort[0]=publishedAt:desc&pagination[page]=1&pagination[pageSize]=12', { cache: 'no-store' });
+        const json = await res.json();
+        const mapped: Entertainment[] = (json?.data || []).map((it: any) => ({
+          id: it.id,
+          title: it.title || it.attributes?.title,
+          category: it.category || it.attributes?.category,
+          publishedAt: it.publishedAt || it.attributes?.publishedAt,
+          duration: it.duration || it.attributes?.duration,
+        }));
+        if (!cancelled) setItems(mapped);
+      } catch {
+        if (!cancelled) setItems([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <ProtectedRoute>
@@ -86,8 +59,9 @@ export default function EntertainmentPage() {
           </div>
 
           {/* Content Grid */}
+          {loading && (<div className="text-center py-12 text-gray-500">Loading...</div>)}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {entertainmentContent.map((item) => (
+            {items.map((item) => (
               <div key={item.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                 <div className="aspect-video bg-gray-200 relative">
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -107,7 +81,7 @@ export default function EntertainmentPage() {
                     </span>
                     <span className="text-sm text-gray-500 flex items-center">
                       <Clock className="h-4 w-4 mr-1" />
-                      {item.duration}
+                      {item.duration || ''}
                     </span>
                   </div>
                   
@@ -115,19 +89,15 @@ export default function EntertainmentPage() {
                     {item.title}
                   </h3>
                   
-                  <p className="text-gray-600 text-sm mb-4">
-                    {item.description}
-                  </p>
-                  
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-500 flex items-center">
                       <Calendar className="h-4 w-4 mr-1" />
-                      {new Date(item.date).toLocaleDateString()}
+                      {item.publishedAt ? new Date(item.publishedAt).toLocaleDateString() : ''}
                     </span>
                     
                     <button className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                       <Play className="h-4 w-4 mr-2" />
-                      {item.type === 'Music' ? 'Listen' : 'Watch'}
+                      Watch
                     </button>
                   </div>
                 </div>

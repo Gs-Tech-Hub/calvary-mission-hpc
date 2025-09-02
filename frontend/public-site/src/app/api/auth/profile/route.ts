@@ -14,12 +14,24 @@ export async function POST(request: NextRequest) {
       previousChurch,
     } = body;
 
-    // You may want to get the user from session/cookie or require userId in the body
-    // For this example, assume userId and jwt are sent in headers (customize as needed)
-    const userId = request.headers.get('x-user-id');
-    const jwt = request.headers.get('authorization')?.replace('Bearer ', '');
-    if (!userId || !jwt) {
-      return NextResponse.json({ error: 'Unauthorized: userId and jwt required' }, { status: 401 });
+    // Read JWT from auth cookie
+    const cookieHeader = request.headers.get('cookie');
+    const jwt = cookieHeader?.split('auth-token=')[1]?.split(';')[0];
+    if (!jwt) {
+      return NextResponse.json({ error: 'Unauthorized: missing token' }, { status: 401 });
+    }
+
+    // Get current user from Strapi to derive userId
+    const meRes = await fetch(`${STRAPI_URL}/api/users/me`, {
+      headers: { Authorization: `Bearer ${jwt}` },
+    });
+    if (!meRes.ok) {
+      return NextResponse.json({ error: 'Unauthorized: invalid token' }, { status: 401 });
+    }
+    const me = await meRes.json();
+    const userId = me?.id || me?.user?.id;
+    if (!userId) {
+      return NextResponse.json({ error: 'Unable to resolve user id' }, { status: 400 });
     }
 
     // 2. If member, update member record

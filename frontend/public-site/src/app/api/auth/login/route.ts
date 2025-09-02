@@ -46,8 +46,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const isProd = process.env.NODE_ENV === 'production'
+    const cookieParts = [
+      `auth-token=${data.jwt}`,
+      'Path=/',
+      'HttpOnly',
+      'SameSite=Strict',
+      isProd ? 'Secure' : '',
+    ].filter(Boolean)
     const responseHeaders = new Headers()
-    responseHeaders.set('Set-Cookie', `auth-token=${data.jwt}; Path=/; HttpOnly; SameSite=Strict`)
+    responseHeaders.set('Set-Cookie', cookieParts.join('; '))
 
     return NextResponse.json(
       { 

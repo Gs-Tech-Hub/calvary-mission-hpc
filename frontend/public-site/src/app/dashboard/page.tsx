@@ -3,7 +3,6 @@
 import { useAuth } from '@/lib/auth-context';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import DashboardNav from '@/components/dashboard/DashboardNav';
-import DashboardStats from '@/components/dashboard/DashboardStats';
 import QuickActions from '@/components/dashboard/QuickActions';
 import RecentActivity from '@/components/dashboard/RecentActivity';
 
@@ -26,8 +25,7 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          {/* Dashboard Stats */}
-          <DashboardStats />
+          {/* Notifications moved to nav; stats grid removed */}
 
           {/* Quick Access */}
           <QuickActions />

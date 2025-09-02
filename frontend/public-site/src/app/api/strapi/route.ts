@@ -40,7 +40,16 @@ export async function GET(request: NextRequest) {
     const query = searchParams.toString()
 
     try {
-        const data = await strapiRequest(endpoint, query)
+        // Try to read JWT from auth cookie and prefer it over static token
+        const cookieHeader = request.headers.get('cookie')
+        const authToken = cookieHeader?.split('auth-token=')[1]?.split(';')[0]
+
+        const headers: Record<string, string> = {}
+        if (authToken) {
+            headers.Authorization = `Bearer ${authToken}`
+        }
+
+        const data = await strapiRequest(endpoint, query, { headers })
         return NextResponse.json(data)
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 })
