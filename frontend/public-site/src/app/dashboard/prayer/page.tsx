@@ -103,7 +103,6 @@ export default function PrayerPage() {
             email: formData.email.trim(),
             phone: formData.phone.trim(),
             request: formData.request.trim(),
-            status: "new",
             ...(formData.sessionId && { session: formData.sessionId }),
           }
         }),

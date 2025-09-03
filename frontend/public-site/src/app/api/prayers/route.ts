@@ -31,7 +31,6 @@ export async function POST(request: NextRequest) {
           email: email || undefined,
           phone: phone || undefined,
           request: prayerRequest,
-          status: 'new',
           createdAt: new Date().toISOString(),
         }
       }),
