@@ -9,25 +9,70 @@ type CountResponse = {
   data?: unknown[];
 };
 
+interface NotificationItem {
+  id: string;
+  type: 'sermons' | 'eventsUpcoming' | 'liveActive' | 'news' | 'bible' | 'prayers';
+  count: number;
+  lastUpdated: number;
+}
+
+interface ReadStatus {
+  [key: string]: {
+    lastReadCount: number;
+    lastReadTime: number;
+  };
+}
+
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const cache = new Map<string, { value: number; timestamp: number }>();
+
 async function fetchCount(endpoint: string, query: string): Promise<number> {
+  const cacheKey = `${endpoint}-${query}`;
+  const now = Date.now();
+  const cached = cache.get(cacheKey);
+
+  if (cached && now - cached.timestamp < CACHE_DURATION) {
+    return cached.value;
+  }
+
   try {
     const url = `/api/strapi?endpoint=${encodeURIComponent(endpoint)}&${query}`;
-    const res = await fetch(url, { cache: 'no-store' });
+    const res = await fetch(url, { 
+      cache: 'default',
+      headers: {
+        'Cache-Control': 'max-age=300' // 5 minutes
+      }
+    });
     if (!res.ok) return 0;
     const json: CountResponse = await res.json();
-    // Strapi v4 returns meta.pagination.total; fallback to data length
     const total = json?.meta?.pagination?.total;
-    if (typeof total === 'number') return total;
-    if (Array.isArray(json?.data)) return json.data.length;
-    return 0;
+    const value = typeof total === 'number' ? total : Array.isArray(json?.data) ? json.data.length : 0;
+    
+    // Update cache
+    cache.set(cacheKey, { value, timestamp: now });
+    return value;
   } catch {
     return 0;
   }
 }
 
+const STORAGE_KEY = 'notification-read-status';
+
+function getReadStatus(): ReadStatus {
+  if (typeof window === 'undefined') return {};
+  const stored = localStorage.getItem(STORAGE_KEY);
+  return stored ? JSON.parse(stored) : {};
+}
+
+function saveReadStatus(status: ReadStatus) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(status));
+}
+
 export default function NotificationsDropdown() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [readStatus, setReadStatus] = useState<ReadStatus>({});
   const [counts, setCounts] = useState({
     sermons: 0,
     eventsUpcoming: 0,
@@ -36,6 +81,11 @@ export default function NotificationsDropdown() {
     bible: 0,
     prayers: 0,
   });
+
+  useEffect(() => {
+    // Initialize read status from localStorage
+    setReadStatus(getReadStatus());
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,14 +106,39 @@ export default function NotificationsDropdown() {
       }
     };
     load();
-    const interval = setInterval(load, 60_000);
+    // Poll every 5 minutes instead of every minute
+    const interval = setInterval(load, 5 * 60 * 1000);
     return () => {
       cancelled = true;
       clearInterval(interval);
     };
   }, []);
 
-  const totalNotifications = Object.values(counts).reduce((a, b) => a + b, 0);
+  const markAsRead = (type: keyof typeof counts) => {
+    const newStatus = {
+      ...readStatus,
+      [type]: {
+        lastReadCount: counts[type],
+        lastReadTime: Date.now()
+      }
+    };
+    setReadStatus(newStatus);
+    saveReadStatus(newStatus);
+  };
+
+  const getUnreadCount = (type: keyof typeof counts) => {
+    const status = readStatus[type];
+    if (!status) return counts[type];
+    return Math.max(0, counts[type] - status.lastReadCount);
+  };
+
+  const totalUnread = Object.keys(counts).reduce((total, type) => 
+    total + getUnreadCount(type as keyof typeof counts), 0
+  );
+
+  const handleItemClick = (type: keyof typeof counts) => {
+    markAsRead(type);
+  };
 
   return (
     <div className="relative">
@@ -73,31 +148,40 @@ export default function NotificationsDropdown() {
         aria-label="Notifications"
       >
         <Bell className="h-5 w-5" />
-        {!loading && totalNotifications > 0 && (
-          <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
-            {totalNotifications}
+        {!loading && totalUnread > 0 && (
+          <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-blue-600 rounded-full">
+            {totalUnread}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+        <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-md shadow-lg z-[9999]">
           <div className="p-3 border-b border-gray-100">
             <p className="text-sm font-medium text-gray-900">Notifications</p>
             <p className="text-xs text-gray-500">Live counts from content</p>
           </div>
           <ul className="divide-y divide-gray-100">
-            <li className="px-3 py-2 flex items-center justify-between">
+            <li 
+              className={`px-3 py-2 flex items-center justify-between cursor-pointer hover:bg-gray-50 ${getUnreadCount('sermons') > 0 ? 'bg-blue-50' : ''}`}
+              onClick={() => handleItemClick('sermons')}
+            >
               <div className="flex items-center text-gray-700">
-                <BookOpen className="h-4 w-4 mr-2 text-gray-400" />
-                <span className="text-sm">Available Sermons</span>
+                <BookOpen className={`h-4 w-4 mr-2 ${getUnreadCount('sermons') > 0 ? 'text-blue-500' : 'text-gray-400'}`} />
+                <span className={`text-sm ${getUnreadCount('sermons') > 0 ? 'font-medium text-blue-900' : ''}`}>Available Sermons</span>
               </div>
-              <span className="text-sm font-semibold text-gray-900">{counts.sermons}</span>
+              <span className={`text-sm font-semibold ${getUnreadCount('sermons') > 0 ? 'text-blue-600' : 'text-gray-900'}`}>
+                {counts.sermons}
+                {getUnreadCount('sermons') > 0 && <span className="ml-1 text-xs text-blue-500">({getUnreadCount('sermons')} new)</span>}
+              </span>
             </li>
-            <li className="px-3 py-2 flex items-center justify-between">
+            <li 
+              className={`px-3 py-2 flex items-center justify-between cursor-pointer hover:bg-gray-50 ${getUnreadCount('eventsUpcoming') > 0 ? 'bg-blue-50' : ''}`}
+              onClick={() => handleItemClick('eventsUpcoming')}
+            >
               <div className="flex items-center text-gray-700">
-                <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                <span className="text-sm">Upcoming Events</span>
+                <Calendar className={`h-4 w-4 mr-2 ${getUnreadCount('eventsUpcoming') > 0 ? 'text-blue-500' : 'text-gray-400'}`} />
+                <span className={`text-sm ${getUnreadCount('eventsUpcoming') > 0 ? 'font-medium text-blue-900' : ''}`}>Upcoming Events</span>
               </div>
               <span className="text-sm font-semibold text-gray-900">{counts.eventsUpcoming}</span>
             </li>
