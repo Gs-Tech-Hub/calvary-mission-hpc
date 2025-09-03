@@ -21,7 +21,6 @@ interface PrayerRequest {
   phone?: string;
   request: string;
   status: 'new' | 'in-progress' | 'prayed';
-  createdAt: string;
 }
 
 export default function PrayerPage() {
@@ -36,7 +35,6 @@ export default function PrayerPage() {
     email: user?.email || '',
     phone: user?.phone || '',
     request: '',
-    sessionId: null as number | null,
   });
 
   useEffect(() => {
@@ -103,7 +101,6 @@ export default function PrayerPage() {
             email: formData.email.trim(),
             phone: formData.phone.trim(),
             request: formData.request.trim(),
-            ...(formData.sessionId && { session: formData.sessionId }),
           }
         }),
       });
@@ -115,7 +112,6 @@ export default function PrayerPage() {
           email: user?.email || '',
           phone: user?.phone || '',
           request: '',
-          sessionId: null,
         });
         setShowForm(false);
         loadData(); // Refresh the list
@@ -322,13 +318,10 @@ export default function PrayerPage() {
                               request.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800' :
                               'bg-green-100 text-green-800'
                             }`}>
-                              {request.status.replace('-', ' ')}
                             </span>
                           </div>
                           <p className="text-gray-700 mb-2">{request.request}</p>
-                          <p className="text-xs text-gray-500">
-                            Submitted on {new Date(request.createdAt).toLocaleDateString()}
-                          </p>
+                          
                         </div>
                       </div>
                     </div>
