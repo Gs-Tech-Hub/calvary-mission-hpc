@@ -89,7 +89,6 @@ export default function DashboardNav() {
 
           {/* Mobile menu button */}
           <div className="lg:hidden flex items-center space-x-1">
-            <NotificationsDropdown />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"

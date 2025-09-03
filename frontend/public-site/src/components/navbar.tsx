@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X, User, LogOut, Download } from "lucide-react";
 import { org } from "@/lib/org";
 import { useAuth } from "@/lib/auth-context";
+import NotificationsDropdown from "./dashboard/NotificationsDropdown";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -164,6 +165,8 @@ export default function Navbar() {
           
           {user ? (
             <>
+              <NotificationsDropdown />
+
               <Link
                 href="/dashboard"
                 className="flex items-center space-x-2 px-4 py-2 text-white hover:text-yellow-400 transition-colors"
@@ -231,6 +234,7 @@ export default function Navbar() {
           <li className="pt-4 border-t border-gray-600">
             {user ? (
               <>
+                <NotificationsDropdown />
                 <Link 
                   href="/dashboard" 
                   onClick={() => setMobileMenuOpen(false)}

@@ -48,7 +48,6 @@ export default function NotificationsDropdown() {
         fetchCount('live-tvs', 'filters[isActive][$eq]=true&pagination[page]=1&pagination[pageSize]=1'),
         fetchCount('news-items', 'pagination[page]=1&pagination[pageSize]=1'),
         fetchCount('bible-studies', 'pagination[page]=1&pagination[pageSize]=1'),
-        // prayers are likely restricted; if forbidden, count stays 0
         fetchCount('prayers', 'pagination[page]=1&pagination[pageSize]=1'),
       ]);
       if (!cancelled) {
@@ -73,7 +72,7 @@ export default function NotificationsDropdown() {
         className="relative inline-flex items-center p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         aria-label="Notifications"
       >
-        <Bell className="h-6 w-6" />
+        <Bell className="h-5 w-5" />
         {!loading && totalNotifications > 0 && (
           <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
             {totalNotifications}

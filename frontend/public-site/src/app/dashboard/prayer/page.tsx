@@ -73,14 +73,25 @@ export default function PrayerPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.request.trim()) {
-      alert('Name and prayer request are required');
+    const requiredFields = {
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
+      request: formData.request.trim(),
+    };
+
+    const missingFields = Object.entries(requiredFields)
+      .filter(([_, value]) => !value)
+      .map(([key]) => key);
+
+    if (missingFields.length > 0) {
+      alert(`Please fill in the following required fields: ${missingFields.join(', ')}`);
       return;
     }
 
     try {
       setSubmitting(true);
-      const response = await fetch('/api/strapi?endpoint=prayers', {
+      const response = await fetch('/api/prayers', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -89,12 +100,12 @@ export default function PrayerPage() {
         body: JSON.stringify({
           data: {
             name: formData.name.trim(),
-            email: formData.email.trim() || undefined,
-            phone: formData.phone.trim() || undefined,
+            email: formData.email.trim(),
+            phone: formData.phone.trim(),
             request: formData.request.trim(),
-            status: 'new',
+            status: "new",
             ...(formData.sessionId && { session: formData.sessionId }),
-          },
+          }
         }),
       });
 

@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FlutterWaveButton, closePaymentModal } from "flutterwave-react-v3";
 import { useForm } from "react-hook-form";
 import { flutterwaveConfig } from "@/lib/flutterwave-config";
+import { useAuth } from "@/lib/auth-context";
 
 interface DonationFormData {
   firstName: string;
@@ -66,6 +67,7 @@ export default function DonationForm() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [selectedType, setSelectedType] = useState<DonationType>(donationTypes[0]);
   const [customAmount, setCustomAmount] = useState<number | "">("");
+  const { user } = useAuth();
   
   const {
     register,
@@ -89,6 +91,24 @@ export default function DonationForm() {
 
   const watchedAmount = watch("amount");
   const watchedAnonymous = watch("anonymous");
+
+  useEffect(() => {
+    if (user) {
+      // If fullName exists, split it into first and last name
+      if (user.fullName) {
+        const nameParts = user.fullName.trim().split(/\s+/);
+        setValue("firstName", nameParts[0] || "");
+        setValue("lastName", nameParts.slice(1).join(" ") || "");
+      } else {
+        // If no fullName, use username as firstName
+        const userNameParts = user.username ? user.username.trim().split(/\s+/) : [];
+        setValue("firstName", userNameParts[0] || "");
+        setValue("lastName", userNameParts.slice(1).join(" ") || "");
+      }
+      setValue("email", user.email || "");
+      setValue("phone", user.phone || "");
+    }
+  }, [user, setValue]);
 
   const handleDonationTypeChange = (typeId: string) => {
     const type = donationTypes.find(t => t.id === typeId);
