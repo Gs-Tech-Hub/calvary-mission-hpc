@@ -4,54 +4,60 @@ import { useAuth } from '@/lib/auth-context';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import DashboardNav from '@/components/dashboard/DashboardNav';
 import { Plus, Search, Filter, Play, Edit, Trash2, BookOpen } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-// Mock data - in real app this would come from Strapi
-const mockSermons = [
-  {
-    id: 1,
-    title: "Faith Over Fear",
-    preacher: "Pastor John",
-    date: "2025-01-15",
-    duration: "45:30",
-    category: "Sermon",
-    status: "published",
-    views: 1250,
-    thumbnail: "/images/sermon1.jpg"
-  },
-  {
-    id: 2,
-    title: "Walking in Love",
-    preacher: "Pastor Jane",
-    date: "2025-01-08",
-    duration: "52:15",
-    category: "Sermon",
-    status: "published",
-    views: 980,
-    thumbnail: "/images/sermon2.jpg"
-  },
-  {
-    id: 3,
-    title: "Hope in Darkness",
-    preacher: "Pastor Mark",
-    date: "2025-01-01",
-    duration: "48:45",
-    category: "Sermon",
-    status: "draft",
-    views: 0,
-    thumbnail: "/images/sermon3.jpg"
-  }
-];
+type Sermon = {
+  id: number;
+  title: string;
+  speaker?: string;
+  date?: string;
+  youtubeId?: string;
+  description?: any;
+  thumbnail?: { data?: { attributes?: { url?: string } } };
+  status?: string;
+  views?: number;
+};
 
 export default function SermonsPage() {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [sermons, setSermons] = useState<Sermon[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredSermons = mockSermons.filter(sermon => {
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      try {
+        const res = await fetch('/api/strapi?endpoint=sermons&populate[thumbnail]=*&sort[0]=date:desc&pagination[page]=1&pagination[pageSize]=12', { cache: 'no-store' });
+        const json = await res.json();
+        const items: Sermon[] = (json?.data || []).map((it: any) => ({
+          id: it.id,
+          title: it.title || it.attributes?.title,
+          speaker: it.speaker || it.attributes?.speaker,
+          date: it.date || it.attributes?.date,
+          youtubeId: it.youtubeId || it.attributes?.youtubeId,
+          description: it.description || it.attributes?.description,
+          thumbnail: it.thumbnail || it.attributes?.thumbnail,
+          status: 'published',
+          views: 0,
+        }));
+        if (!cancelled) setSermons(items);
+      } catch {
+        if (!cancelled) setSermons([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
+  const filteredSermons = sermons.filter(sermon => {
     const matchesSearch = sermon.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         sermon.preacher.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || sermon.status === filterStatus;
+                         (sermon.speaker || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filterStatus === 'all' || (sermon.status || 'published') === filterStatus;
     return matchesSearch && matchesFilter;
   });
 
@@ -111,15 +117,22 @@ export default function SermonsPage() {
           </div>
 
           {/* Sermons Grid */}
+          {loading && (
+            <div className="text-center py-12 text-gray-500">Loading...</div>
+          )}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filteredSermons.map((sermon) => (
               <div key={sermon.id} className="bg-white rounded-lg shadow overflow-hidden">
                 <div className="aspect-w-16 aspect-h-9 bg-gray-200">
-                  <img
-                    src={sermon.thumbnail}
-                    alt={sermon.title}
-                    className="w-full h-48 object-cover"
-                  />
+                  {sermon.thumbnail?.data?.attributes?.url ? (
+                    <img
+                      src={sermon.thumbnail.data.attributes.url}
+                      alt={sermon.title}
+                      className="w-full h-48 object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-48 bg-gray-100" />
+                  )}
                 </div>
                 <div className="p-4">
                   <div className="flex items-center justify-between mb-2">
@@ -128,17 +141,17 @@ export default function SermonsPage() {
                       sermon.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
                       'bg-gray-100 text-gray-800'
                     }`}>
-                      {sermon.status}
+                      {sermon.status || 'published'}
                     </span>
-                    <span className="text-sm text-gray-500">{sermon.views} views</span>
+                    <span className="text-sm text-gray-500">{sermon.views ?? 0} views</span>
                   </div>
                   
                   <h3 className="text-lg font-medium text-gray-900 mb-1">{sermon.title}</h3>
-                  <p className="text-sm text-gray-600 mb-2">by {sermon.preacher}</p>
+                  <p className="text-sm text-gray-600 mb-2">by {sermon.speaker || '—'}</p>
                   
                   <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                    <span>{sermon.date}</span>
-                    <span>{sermon.duration}</span>
+                    <span>{sermon.date ? new Date(sermon.date).toLocaleDateString() : ''}</span>
+                    <span>{sermon.youtubeId ? 'YouTube' : ''}</span>
                   </div>
                   
                   <div className="flex items-center justify-between">

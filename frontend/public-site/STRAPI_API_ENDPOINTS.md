@@ -15,8 +15,8 @@ Notes:
 
 ### Authentication (Users & Permissions)
 
-- POST `/api/auth/local` — Login
-  - Body: `{ identifier: string (email or username), password: string }`
+- POST `/api/phone-login` — Login
+  - Body: `{ identifier: string (phone: phone), password: string }`
   - Response: `{ jwt, user }`
 
 - POST `/api/auth/local/register` — Register (if allowed in admin)

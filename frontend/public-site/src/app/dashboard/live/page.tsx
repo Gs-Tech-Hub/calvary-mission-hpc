@@ -8,32 +8,36 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import DashboardNav from '@/components/dashboard/DashboardNav';
 
 export default function DashboardLivePage() {
+  const [liveStreams, setLiveStreams] = useState<any[]>([]);
   const [currentVideo, setCurrentVideo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchVideo() {
+    async function fetchVideos() {
       try {
         const liveRes = await fetch('/api/strapi?endpoint=live-streams&filters[isLive][$eq]=true&populate=*');
         if (liveRes.ok) {
           const liveData = await liveRes.json();
-          if (liveData.data.length > 0) {
-            const live = liveData.data[0];
+          const streams = liveData.data.map((live: any) => {
             let videoUrl = live.watchUrl;
             if (live.watchUrl && live.watchUrl.includes('youtube.com/watch?v=')) {
               const videoId = live.watchUrl.split('v=')[1];
               videoUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&autoplay=1`;
             }
-            setCurrentVideo({
+            return {
               id: `live-${live.id}`,
               title: `🔴 ${live.title} (LIVE)`,
-              description: "Currently streaming live",
+              description: live.description || "Currently streaming live",
               videoUrl,
               isLive: true,
-            });
-            setLoading(false);
-            return;
+            };
+          });
+          setLiveStreams(streams);
+          if (streams.length > 0 && !currentVideo) {
+            setCurrentVideo(streams[0]);
           }
+          setLoading(false);
+          if (streams.length > 0) return;
         }
 
         const sermonsRes = await fetch('/api/strapi?endpoint=sermons&populate=*&sort[0]=date:desc&pagination[limit]=1');
@@ -57,7 +61,7 @@ export default function DashboardLivePage() {
       }
     }
 
-    fetchVideo();
+    fetchVideos();
   }, []);
 
   return (
@@ -72,28 +76,29 @@ export default function DashboardLivePage() {
           ) : (
             <section className="pt-4 pb-4 bg-gray-50">
               <header className="mb-6">
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Live Service</h1>
-                <p className="text-gray-600 mt-2">Join the stream and engage with the community.</p>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Live Streams</h1>
+                <p className="text-gray-600 mt-2">Watch live services and engage with the community.</p>
               </header>
 
-              <div className="grid gap-6 lg:grid-cols-3">
-                <div className="lg:col-span-2 space-y-6">
-                  <div className="rounded-xl overflow-hidden shadow bg-white">
-                    {currentVideo ? (
-                      <iframe
-                        width="100%"
-                        height="400"
-                        src={currentVideo.videoUrl}
-                        title={currentVideo.title}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                        className="w-full"
-                        frameBorder="0"
-                        loading="lazy"
-                        referrerPolicy="strict-origin-when-cross-origin"
-                      ></iframe>
-                    ) : (
-                      <div className="w-full h-[400px] bg-gray-100 flex items-center justify-center">
+              {liveStreams.length > 0 ? (
+                <div className="grid gap-6 lg:grid-cols-3">
+                  <div className="lg:col-span-2 space-y-6">
+                    <div className="rounded-xl overflow-hidden shadow bg-white">
+                      {currentVideo ? (
+                        <iframe
+                          width="100%"
+                          height="400"
+                          src={currentVideo.videoUrl}
+                          title={currentVideo.title}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                          className="w-full"
+                          frameBorder="0"
+                          loading="lazy"
+                          referrerPolicy="strict-origin-when-cross-origin"
+                        ></iframe>
+                      ) : (
+                        <div className="w-full h-[400px] bg-gray-100 flex items-center justify-center">
                         <p className="text-gray-500">No video available</p>
                       </div>
                     )}
@@ -121,6 +126,11 @@ export default function DashboardLivePage() {
                   </div>
                 </aside>
               </div>
+            ) : (
+              <div className="w-full h-[400px] bg-gray-100 flex items-center justify-center">
+                <p className="text-gray-500">No live streams available</p>
+              </div>
+            )}
             </section>
           )}
         </div>

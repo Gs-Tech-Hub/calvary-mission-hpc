@@ -7,8 +7,9 @@ import { usePathname } from "next/navigation";
 import { Menu, X, User, LogOut, Download } from "lucide-react";
 import { org } from "@/lib/org";
 import { useAuth } from "@/lib/auth-context";
+import NotificationsDropdown from "./dashboard/NotificationsDropdown";
 
-const navLinks = [
+const publicNavLinks = [
   { name: "Home", href: "/" },
   { name: "About", href: "/about" },
   { name: "Contact", href: "/contact" },
@@ -131,7 +132,7 @@ export default function Navbar() {
         </Link>
 
         <ul className="hidden md:flex space-x-6">
-          {navLinks.map((link) => (
+          {!user && publicNavLinks.map((link) => (
             <li key={link.name}>
               <Link
                 href={link.href}
@@ -164,6 +165,8 @@ export default function Navbar() {
           
           {user ? (
             <>
+              <NotificationsDropdown />
+
               <Link
                 href="/dashboard"
                 className="flex items-center space-x-2 px-4 py-2 text-white hover:text-yellow-400 transition-colors"
@@ -203,7 +206,7 @@ export default function Navbar() {
       </div>
       <div className={`md:hidden bg-[#0A1D3C] text-white overflow-hidden transition-all duration-300 ${mobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
         <ul className="px-6 py-4 space-y-4">
-          {navLinks.map((link) => (
+          {!user && publicNavLinks.map((link) => (
             <li key={link.name}>
               <Link href={link.href} onClick={() => setMobileMenuOpen(false)} className={pathname === link.href ? "text-yellow-400" : ""}>
                 {link.name}
@@ -231,6 +234,7 @@ export default function Navbar() {
           <li className="pt-4 border-t border-gray-600">
             {user ? (
               <>
+                <NotificationsDropdown />
                 <Link 
                   href="/dashboard" 
                   onClick={() => setMobileMenuOpen(false)}
