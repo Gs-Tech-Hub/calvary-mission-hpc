@@ -1,72 +1,8 @@
 "use client";
 
-import { Calendar, Clock, User, Eye, Heart, Gift, BookOpen, Tv } from 'lucide-react';
-
-const recentActivities = [
-  {
-    id: 1,
-    type: 'sermon',
-    title: 'New sermon available',
-    description: 'Faith Over Fear - Pastor John',
-    time: '2 hours ago',
-    user: 'Church Admin',
-    action: 'View',
-  },
-  {
-    id: 2,
-    type: 'event',
-    title: 'Upcoming event',
-    description: 'Youth Conference 2025 - Register now',
-    time: '1 day ago',
-    user: 'Church Admin',
-    action: 'Details',
-  },
-  {
-    id: 3,
-    type: 'prayer',
-    title: 'Prayer request submitted',
-    description: 'Prayer for family healing',
-    time: '2 days ago',
-    user: 'You',
-    action: 'View',
-  },
-  {
-    id: 4,
-    type: 'donation',
-    title: 'Donation received',
-    description: 'Monthly tithe - $100 - Thank you!',
-    time: '3 days ago',
-    user: 'You',
-    action: 'Receipt',
-  },
-  {
-    id: 5,
-    type: 'news',
-    title: 'New announcement',
-    description: 'Church renovation updates and schedule',
-    time: '1 week ago',
-    user: 'Church Admin',
-    action: 'Read',
-  },
-  {
-    id: 6,
-    type: 'bible-study',
-    title: 'New Bible lesson',
-    description: 'Understanding Grace - Lesson 5',
-    time: '1 week ago',
-    user: 'Church Admin',
-    action: 'Study',
-  },
-  {
-    id: 7,
-    type: 'live-tv',
-    title: 'Live service starting',
-    description: 'Sunday Service - Join us live',
-    time: '2 weeks ago',
-    user: 'Church Admin',
-    action: 'Watch',
-  },
-];
+import { Clock, User, Calendar, Eye, Heart, Gift, BookOpen, Tv } from 'lucide-react';
+import { formatRelativeTime } from '@/lib/utils';
+import { useActivities, type ActivityItem } from '@/lib/activity-context';
 
 const getActivityIcon = (type: string) => {
   switch (type) {
@@ -130,14 +66,48 @@ const getActionIcon = (action: string) => {
 };
 
 export default function RecentActivity() {
+  const { activities, isLoading, error, mutate } = useActivities();
+
+  if (isLoading) {
+    return (
+      <div>
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h2>
+        <div className="bg-white shadow overflow-hidden sm:rounded-md p-4">
+          <div className="animate-pulse space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex space-x-4">
+                <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                <div className="flex-1 space-y-2 py-1">
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div>
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h2>
+        <div className="bg-white shadow overflow-hidden sm:rounded-md p-4">
+          <div className="text-red-600">
+            Error loading activities. Please try again later.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <h2 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h2>
       <div className="bg-white shadow overflow-hidden sm:rounded-md">
         <ul className="divide-y divide-gray-200">
-          {recentActivities.map((activity) => {
-            const ActionIcon = getActionIcon(activity.action);
-            
+          {activities.map((activity) => {
             return (
               <li key={activity.id}>
                 <div className="px-4 py-4 sm:px-6">
@@ -163,12 +133,14 @@ export default function RecentActivity() {
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center text-sm text-gray-500">
                         <Clock className="h-4 w-4 mr-1" />
-                        {activity.time}
+                        {formatRelativeTime(activity.createdAt)}
                       </div>
-                      <button className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        <ActionIcon className="h-3 w-3 mr-1" />
-                        {activity.action}
-                      </button>
+                      {activity.user && (
+                        <div className="flex items-center text-sm text-gray-500">
+                          <User className="h-4 w-4 mr-1" />
+                          {activity.user}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="mt-2 sm:flex sm:justify-between">
