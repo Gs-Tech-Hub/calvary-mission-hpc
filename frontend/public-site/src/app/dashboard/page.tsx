@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/auth-context';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import DashboardNav from '@/components/dashboard/DashboardNav';
 import QuickActions from '@/components/dashboard/QuickActions';
-import RecentActivity from '@/components/dashboard/RecentActivity';
+// import RecentActivity from '@/components/dashboard/RecentActivity';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -31,7 +31,7 @@ export default function DashboardPage() {
           <QuickActions />
 
           {/* Recent Activity */}
-          <RecentActivity />
+          {/* <RecentActivity /> */}
         </div>
       </div>
     </ProtectedRoute>
