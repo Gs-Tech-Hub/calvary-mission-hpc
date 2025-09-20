@@ -1,8 +1,6 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import LiveComments from "@/components/LiveComments";
 import ProtectedRoute from '@/components/ProtectedRoute';
 import DashboardNav from '@/components/dashboard/DashboardNav';
@@ -15,92 +13,50 @@ export default function DashboardLivePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let mounted = true;
+    let pollInterval: NodeJS.Timeout;
+    const POLL_INTERVAL = 60000; // Poll every 1 minute
+    
+    // Initial fetch
+    fetchVideos();
+    
+    // Set up polling
+    pollInterval = setInterval(fetchVideos, POLL_INTERVAL);
+    
+    // Cleanup function
+    return () => {
+      mounted = false;
+      clearInterval(pollInterval);
+    };
+    
     async function fetchVideos() {
+      if (!mounted) return;
+      
       try {
         setError(null);
-        setLoading(true);
+        
+        // Only show loading state on initial load
+        if (liveStreams.length === 0) {
+          setLoading(true);
+        }
 
         // First try to fetch YouTube live streams
         const youtubeRes = await fetch('/api/youtube/live');
+        if (!mounted) return;
+        
         if (!youtubeRes.ok) {
           throw new Error('Failed to fetch YouTube streams');
         }
 
         const youtubeStreams = await youtubeRes.json();
-        if (Array.isArray(youtubeStreams) && youtubeStreams.length > 0) {
+        if (!mounted) return;
+        
+        if (Array.isArray(youtubeStreams)) {
           setLiveStreams(youtubeStreams);
-          if (!currentVideo) {
+          if (youtubeStreams.length > 0 && !currentVideo) {
             setCurrentVideo(youtubeStreams[0]);
           }
           setLoading(false);
-          return;
-        }
-
-        // Fallback to Strapi live streams
-        const liveRes = await fetch('/api/strapi?endpoint=live-streams&filters[isLive][$eq]=true&populate=*');
-        if (!liveRes.ok) {
-          throw new Error('Failed to fetch Strapi live streams');
-        }
-
-        const liveData = await liveRes.json();
-        
-        interface StrapiLiveStream {
-          id: string;
-          title: string;
-          description: string;
-          watchUrl: string;
-        }
-        
-        const streams = liveData.data.map((live: StrapiLiveStream) => {
-          let videoUrl = live.watchUrl;
-          let videoId = '';
-          if (live.watchUrl && live.watchUrl.includes('youtube.com/watch?v=')) {
-            videoId = live.watchUrl.split('v=')[1];
-            videoUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&autoplay=1`;
-          }
-          return {
-            id: `live-${live.id}`,
-            title: `🔴 ${live.title} (LIVE)`,
-            description: live.description || "Currently streaming live",
-            videoUrl,
-            thumbnailUrl: videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : '',
-            isLive: true,
-          };
-        });
-
-        setLiveStreams(streams);
-        if (streams.length > 0 && !currentVideo) {
-          setCurrentVideo(streams[0]);
-          setLoading(false);
-          return;
-        }
-
-        // If no live streams, fetch latest sermon
-        const sermonsRes = await fetch('/api/strapi?endpoint=sermons&populate=*&sort[0]=date:desc&pagination[limit]=1');
-        if (!sermonsRes.ok) {
-          throw new Error('Failed to fetch latest sermon');
-        }
-
-        const sermonsData = await sermonsRes.json();
-        
-        interface StrapiSermon {
-          id: string;
-          title: string;
-          description: { children: { text: string }[] }[];
-          youtubeId: string;
-        }
-        
-        if (sermonsData.data.length > 0) {
-          const sermon = sermonsData.data[0] as StrapiSermon;
-          const thumbnailUrl = `https://img.youtube.com/vi/${sermon.youtubeId}/hqdefault.jpg`;
-          setCurrentVideo({
-            id: sermon.id,
-            title: sermon.title,
-            description: sermon.description?.[0]?.children?.[0]?.text || "Latest sermon",
-            videoUrl: `https://www.youtube.com/embed/${sermon.youtubeId}?rel=0&modestbranding=1`,
-            thumbnailUrl,
-            isLive: false,
-          });
         }
       } catch (err) {
         console.error('Error fetching videos:', err);
@@ -133,8 +89,8 @@ export default function DashboardLivePage() {
           ) : (
             <section className="pt-4 pb-4 bg-gray-50">
               <header className="mb-6">
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Live Streams</h1>
-                <p className="text-gray-600 mt-2">Watch live services and engage with the community.</p>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">YouTube Live Streams</h1>
+                <p className="text-gray-600 mt-2">Watch our live YouTube broadcasts and engage with the community.</p>
               </header>
 
               <div className="grid gap-6 lg:grid-cols-3">
