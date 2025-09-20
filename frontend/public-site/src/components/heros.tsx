@@ -60,7 +60,7 @@ export default function Hero() {
     const label = liveStream ? "🔴 Watch Live Now" : "Live Service";
     return (
       <Link
-        href="/live"
+        href="/dashboard/live"
         className={`px-6 py-3 rounded-md transition-all flex items-center gap-2 ${
           liveStream
             ? "bg-red-600 text-white hover:bg-red-700"

@@ -60,7 +60,7 @@ export default function Hero() {
     const label = liveStream ? "🔴 Watch Live Now" : "Live Service";
     return (
       <Link
-        href="/live"
+        href="/dashboard/live"
         className={`px-6 py-3 rounded-md transition-all flex items-center gap-2 ${
           liveStream
             ? "bg-red-600 text-white hover:bg-red-700"
@@ -94,9 +94,9 @@ export default function Hero() {
           <p className="text-lg mb-6">{heroData.description || heroData.heroText?.subtitle}</p>
 
           <div className="flex flex-col md:flex-row gap-4">
-            <button className="px-6 py-3 border-2 border-white text-white rounded-md transition-all hover:bg-white hover:text-[#0A1D3C]">
+            <Link href="/dashboard/sermons" className="px-6 py-3 border-2 border-white text-white rounded-md transition-all hover:bg-white hover:text-[#0A1D3C]">
               Go to Sermons
-            </button>
+            </Link>
             <LiveStreamButton />
           </div>
 

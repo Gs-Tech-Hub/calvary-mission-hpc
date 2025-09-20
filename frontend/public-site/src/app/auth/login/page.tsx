@@ -34,7 +34,11 @@ export default function LoginPage() {
         throw new Error('Enter phone in E.164 format with country code, e.g. +2348012345678');
       }
       await login(full);
-      router.push('/dashboard');
+      
+      // Check for redirect parameter in URL
+      const params = new URLSearchParams(window.location.search);
+      const redirectTo = params.get('redirect');
+      router.push(redirectTo || '/dashboard');
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {

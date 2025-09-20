@@ -32,7 +32,7 @@ export const sermons = [
   {
     id: 1,
     title: "Faith Over Fear",
-    preacher: "Pastor John",
+    preacher: "Pastor Tony",
     date: "July 15, 2025",
     image: "/images/sermon1.jpg",
     description: "Discover how faith can overcome even the deepest fears in life.",
@@ -41,7 +41,7 @@ export const sermons = [
   {
     id: 2,
     title: "Walking in Grace",
-    preacher: "Pastor Jane ",
+    preacher: "Pastor Gideon ",
     date: "July 8, 2025",
     image: "/images/sermon2.jpg",
     description: "Learn how to walk boldly in the grace that God freely gives.",
@@ -50,7 +50,7 @@ export const sermons = [
   {
     id: 3,
     title: "The Power of Prayer",
-    preacher: "Pastor Mark",
+    preacher: "Pastor Godstime",
     date: "July 1, 2025",
     image: "/images/sermon3.jpg",
     description: "Explore the incredible power of prayer to change lives.",
@@ -317,7 +317,7 @@ export const aboutContent = {
     { year: "2000", event: "Built our first worship hall to accommodate our growing community." },
     { year: "2008", event: "Started our Youth Ministry and outreach programs." },
     { year: "2015", event: "Launched community development projects and charity drives." },
-    { year: "2022", event: "Introduced online streaming and global prayer meetings." },
+    { year: "2025", event: "Introduced online streaming and global prayer meetings." },
   ],
 
   timelineImage: "/images/timeline.jpg",

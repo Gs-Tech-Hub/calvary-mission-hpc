@@ -30,7 +30,7 @@ export default function SermonsPage() {
     async function load() {
       setLoading(true);
       try {
-        const res = await fetch('/api/strapi?endpoint=sermons&populate[thumbnail]=*&sort[0]=date:desc&pagination[page]=1&pagination[pageSize]=12', { cache: 'no-store' });
+        const res = await fetch('/api/strapi?endpoint=sermons&populate[thumbnail]=*&populate[views]=*&sort[0]=date:desc&pagination[page]=1&pagination[pageSize]=12', { cache: 'no-store' });
         const json = await res.json();
         const items: Sermon[] = (json?.data || []).map((it: any) => ({
           id: it.id,
@@ -40,8 +40,8 @@ export default function SermonsPage() {
           youtubeId: it.youtubeId || it.attributes?.youtubeId,
           description: it.description || it.attributes?.description,
           thumbnail: it.thumbnail || it.attributes?.thumbnail,
-          status: 'published',
-          views: 0,
+          status: it.status || it.attributes?.status || 'published',
+          views: it.views || it.attributes?.views || 0,
         }));
         if (!cancelled) setSermons(items);
       } catch {
@@ -57,7 +57,18 @@ export default function SermonsPage() {
   const filteredSermons = sermons.filter(sermon => {
     const matchesSearch = sermon.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (sermon.speaker || '').toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || (sermon.status || 'published') === filterStatus;
+    
+    const now = new Date();
+    const sermonDate = sermon.date ? new Date(sermon.date) : null;
+    
+    let matchesFilter = true;
+    if (sermonDate && filterStatus !== 'all') {
+      const diffDays = (now.getTime() - sermonDate.getTime()) / (1000 * 3600 * 24);
+      matchesFilter = filterStatus === 'week' ? diffDays <= 7 :
+                     filterStatus === 'month' ? diffDays <= 30 :
+                     filterStatus === 'year' ? diffDays <= 365 : true;
+    }
+    
     return matchesSearch && matchesFilter;
   });
 
@@ -73,13 +84,9 @@ export default function SermonsPage() {
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">Sermons</h1>
                 <p className="mt-2 text-gray-600">
-                  Manage and organize your sermon content
+                  Read your favorite sermons.
                 </p>
               </div>
-              <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Sermon
-              </button>
             </div>
           </div>
 
@@ -106,10 +113,10 @@ export default function SermonsPage() {
                     onChange={(e) => setFilterStatus(e.target.value)}
                     className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                   >
-                    <option value="all">All Status</option>
-                    <option value="published">Published</option>
-                    <option value="draft">Draft</option>
-                    <option value="archived">Archived</option>
+                    <option value="all">All Time</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="year">This Year</option>
                   </select>
                 </div>
               </div>

@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import Navbar from '@/components/navbar';
 import { org } from '@/lib/org';
 import { AuthProvider } from '@/lib/auth-context';
+import { ActivityProvider } from '@/lib/activity-context';
 import PWAInstaller from '@/components/PWAInstaller';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -83,13 +84,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={`${inter.className} flex flex-col min-h-screen`}>
         <AuthProvider>
-          <Navbar />
+          <ActivityProvider>
+            <Navbar />
 
-          <main className="flex-1 overflow-x-hidden pt-0 px-0">
-            {children}
-          </main>
-          
-          <PWAInstaller />
+            <main className="flex-1 overflow-x-hidden pt-0 px-0">
+              {children}
+            </main>
+            
+            <PWAInstaller />
+          </ActivityProvider>
         </AuthProvider>
       </body>
     </html>
